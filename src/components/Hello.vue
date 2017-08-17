@@ -220,20 +220,7 @@ export default {
                    setTimeout(function(){ instance.now_playing()}, 5000);
                   });
 
-      },
-      jazz() {
-                this.play(this.jazzContent);  
-            },  
-      reggae() {
-                this.play(this.reggaeContent);                
-            }, 
-      classical() {
-                this.play(this.classicContent);                
-            },                        
-      test() {
-                this.play(this.contentItmes[2].item);
-                alert(this.contentItmes[2].name);
-            },  
+      },      
   }
 }
 </script>
