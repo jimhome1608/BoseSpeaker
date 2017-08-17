@@ -2,15 +2,18 @@
   <div class="container">     
     <div class="row"> 
         <ul class="nav nav-pills top_butts">          
-          <li role="presentation" class="liButton"><i v-on:click="now_playing" class="fa fa-music fa-2x" aria-hidden="true"></i></li>
+          
           <li role="presentation">&nbsp;{{now_playing_info}}&nbsp;</i></li>   
-          <li role="presentation" class="liButton"><i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x" aria-hidden="true"></i></li>          
+          <li v-if="now_playing_info!=''" role="presentation" class="liStarButton"><i v-on:click="add_item()" class="fa fa-star fa-2x" aria-hidden="true"></i></li> 
+          <li role="presentation" class="liButton"><i v-on:click="now_playing" class="fa fa-music fa-2x" aria-hidden="true"></i></li>
           <li role="presentation">&nbsp;{{get_volume()}}&nbsp;</i></li>             
+          <li role="presentation" class="liButton"><i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x" aria-hidden="true"></i></li>          
+          
           <li role="presentation" class="liButton"><i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x" aria-hidden="true"></i></li>
-          <li role="presentation">&nbsp;Bass&nbsp;{{get_bass()}}</i></li>   
+          <li role="presentation">&nbsp;{{get_bass()}}</i></li>   
           <li role="presentation" class="liButton"><i v-on:click="bass_up_down(-1)" class="fa fa-minus fa-2x" aria-hidden="true"></i></li> 
           <li role="presentation" class="liButton"><i v-on:click="bass_up_down(1)" class="fa fa-plus fa-2x" aria-hidden="true"></i></li> 
-          <li role="presentation" class="liButton"><i v-on:click="open_register_screen" class="fa fa-plus fa-2x" aria-hidden="true"></i></li> 
+          <li role="presentation" class="liButton"><i v-on:click="open_register_screen" class="fa fa-cogs fa-2x" aria-hidden="true"></i></li> 
         </ul>           
         <ul class="nav nav-pills">          
            <li role="presentation"class="liItem"  v-for="c in contentItmes" ><a v-on:click="play(c)">{{c.name}}</a></li>
@@ -20,7 +23,7 @@
         <img v-if="about_show" class="boseimg" src="../assets/BoseSpeaker.jpg">
         <br /> 
         <br />  
-        <i v-on:click="toggleAbout" class="fa fa-info fa-2x" aria-hidden="true"></i>       
+        <i v-on:click="toggleAbout" class="fa fa-info fa-2x" aria-hidden="true"></i>  
     </div>
     
   </div>
@@ -35,11 +38,12 @@ export default {
   name: 'hello',
   data () {
     return {
-      BoseSpeakerIP: "",
+      BoseSpeakerIP: "10.0.0.49",
       about_show: false,
       playing: {
         image: ""
       },
+      contentItmesStore: "",
       contentItmes: [
         {
 	    	item: "<ContentItem source=\"INTERNET_RADIO\" location=\"77625\" sourceAccount=\"\" isPresetable=\"true\"><itemName>JAZZfm 106.5</itemName><containerArt>http://item.radio456.com/007452/logo/logo-77625.jpg</containerArt></ContentItem>",
@@ -74,7 +78,7 @@ export default {
       ],
       boseObject: '' ,
       volumeObject: '',
-      volume: 0,
+      volume: -10,
       bassObject: '',
       bass: 10,
       ContentItem: '',
@@ -82,11 +86,23 @@ export default {
     }
   },
   created: function () {
-      if (localStorage.getItem("BoseSpeakerIP") != null) {
+      if (localStorage.getItem("BoseSpeakerIP") != null) 
         this.BoseSpeakerIP = localStorage.getItem('BoseSpeakerIP');
+      else 
+        localStorage.setItem('BoseSpeakerIP',this.BoseSpeakerIP );      
+
+      if(localStorage.getItem("contentItmesStore") != null) {
+          this.contentItmes = JSON.parse(localStorage.getItem('contentItmesStore'));
+          console.log("loaded from local storage");
+      }
+      else {
+        localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
       }
   },
   methods: {
+    add_item() {
+        alertify.warning("Add new item. Not implemented yet");
+    },
     get_ip() {
         if (this.BoseSpeakerIP == "") {
             this.$router.push('/register');
@@ -106,12 +122,12 @@ export default {
       var percent = (this.bass - -9) / range      
       percent =  percent * 100;
       percent = percent.toFixed(0);
-      return percent+"%";
+      return "Bass: "+percent+"%";
 
     },
     get_volume() {
-      if (this.volume == 0) return "";
-      return this.volume+"%";
+      if (this.volume == -10) return "";
+      return "Volume: "+this.volume+"%";
 
     },
      bass_up_down(up_value) {
@@ -146,7 +162,8 @@ export default {
     volume_up_down(up_value) {
        var instance = this;
        var _url = this.get_ip()+":8090/volume";
-       if (this.volume == 0) {        
+       //alertify.warning(_url);
+       if (this.volume == -10) {        
           axios.get(_url)
           .then(response => {
             instance.volumeObject =  response.data; 
@@ -235,6 +252,9 @@ h1, h2 {
 }
 .fa {
    cursor: pointer;
+}
+.liStarButton {
+  color: skyblue;
 }
 .liButton {
   border: 1px solid black;
