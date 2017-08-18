@@ -5,7 +5,7 @@ import App from './App'
 import router from './router'
 Vue.config.productionTip = false
 
-alertify.defaults.notifier.position = 'top-right';
+alertify.defaults.notifier.position = 'top-left';
 
 /* eslint-disable no-new */
 new Vue({

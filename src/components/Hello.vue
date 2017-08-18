@@ -2,9 +2,8 @@
   <div class="container">     
     <div class="row"> 
         <ul class="nav nav-pills top_butts">          
-          
-          <li role="presentation">&nbsp;{{now_playing_status}}&nbsp;</i></li>   
-          <li v-on:click="add_content(now_playing)" v-if="now_playing.name!=''" role="presentation" class="liStarButton"><i  class="fa fa-star fa-2x" aria-hidden="true"></i></li> 
+          <li v-on:click="add_content(now_playing)" v-if="now_playing.name!=''" role="presentation" class="liStarButton"><i  class="fa fa-star fa-2x" aria-hidden="true"></i></li>        
+          <li role="presentation">&nbsp;{{now_playing_status}}&nbsp;</i></li>             
           <li role="presentation" class="liButton"><i v-on:click="get_now_playing" class="fa fa-music fa-2x" aria-hidden="true"></i></li>
           <li role="presentation">&nbsp;{{get_volume()}}&nbsp;</i></li>             
           <li role="presentation" class="liButton"><i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x" aria-hidden="true"></i></li>          
@@ -242,24 +241,29 @@ export default {
     get_now_playing() {      
             this.now_playing_status = "Changing Station";
              // var _url = "http://10.0.0.49:8090/trackInfo";
-            var _url =  this.get_ip()+":8090/now_playing"; 
+            var instance = this;
+            var _url =  instance.get_ip()+":8090/now_playing"; 
               axios.get(_url)
                .then(response => {
-                  this.boseObject =  response.data;
-                  console.log(this.boseObject);
-                  var startpos = this.boseObject.indexOf("<ContentItem");
-                  var endpos = this.boseObject.indexOf("</ContentItem>") + 14;
+                  instance.boseObject =  response.data;
+                  console.log(instance.boseObject);
+                  var startpos = instance.boseObject.indexOf("<ContentItem");
+                  var endpos = instance.boseObject.indexOf("</ContentItem>") + 14;
                   var _content = "";
                   console.log(startpos);
-                  _content = this.boseObject.substring(startpos, endpos); 
+                  _content = instance.boseObject.substring(startpos, endpos); 
                   //_content = _content.replace(/\"/g,'\\"');
-                  this.now_playing.item = _content;
-                  console.log(this.now_playing.item);
+                  instance.now_playing.item = _content;
+                  console.log(instance.now_playing.item);
                   var parser = new DOMParser();
-                  var xmlDoc = parser.parseFromString(this.boseObject,"text/xml");                  
-                  this.now_playing.name =  xmlDoc.getElementsByTagName("itemName") [0].childNodes[0].nodeValue; 
-                  this.now_playing.image =  xmlDoc.getElementsByTagName("containerArt") [0].childNodes[0].nodeValue; 
-                  this.now_playing_status = this.now_playing.name;                                 
+                  var xmlDoc = parser.parseFromString(instance.boseObject,"text/xml");                  
+                  instance.now_playing.name =  xmlDoc.getElementsByTagName("itemName") [0].childNodes[0].nodeValue; 
+                  instance.now_playing.image =  xmlDoc.getElementsByTagName("containerArt") [0].childNodes[0].nodeValue; 
+                  instance.now_playing_status = instance.now_playing.name;                                 
+                })
+                .catch(function (response) {
+                    instance.now_playing_status = "Failed to connection on "+instance.BoseSpeakerIP+".  Click Cogs to change settings";
+                    alertify.warning("Failed to connection on "+instance.BoseSpeakerIP+"<br />Click Cogs to change settings");
                 });
                 
       },
@@ -269,13 +273,17 @@ export default {
         this.selected_play.item = ContentItem.name;
         this.selected_play.name = ContentItem.name;
         var instance = this;
-        var _url =  this.get_ip()+":8090/select"; 
-                var _body =  ContentItem.item;                  
-                 axios.post(_url, _body)
-                 .then(response => {
-                   instance.boseObject =  response.data;  
-                   setTimeout(function(){ instance.get_now_playing()}, 5000);
-                  });
+        var _url =  instance.get_ip()+":8090/select"; 
+        var _body =  ContentItem.item;                  
+          axios.post(_url, _body)
+          .then(response => {
+            instance.boseObject =  response.data;  
+            setTimeout(function(){ instance.get_now_playing()}, 5000);
+          })
+          .catch(function (response) {
+                instance.now_playing_status = "Failed to connection on "+instance.BoseSpeakerIP+".  Click Cogs to change settings";
+                alertify.warning("Failed to connection on "+instance.BoseSpeakerIP+"<br />Click Cogs to change settings");
+            });
 
       },      
   }
