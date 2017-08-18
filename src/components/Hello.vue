@@ -3,9 +3,9 @@
     <div class="row"> 
         <ul class="nav nav-pills top_butts">          
           
-          <li role="presentation">&nbsp;{{now_playing_info}}&nbsp;</i></li>   
-          <li v-if="now_playing_info!=''" role="presentation" class="liStarButton"><i v-on:click="add_item()" class="fa fa-star fa-2x" aria-hidden="true"></i></li> 
-          <li role="presentation" class="liButton"><i v-on:click="now_playing" class="fa fa-music fa-2x" aria-hidden="true"></i></li>
+          <li role="presentation">&nbsp;{{now_playing_status}}&nbsp;</i></li>   
+          <li v-on:click="add_content(now_playing)" v-if="now_playing.name!=''" role="presentation" class="liStarButton"><i  class="fa fa-star fa-2x" aria-hidden="true"></i></li> 
+          <li role="presentation" class="liButton"><i v-on:click="get_now_playing" class="fa fa-music fa-2x" aria-hidden="true"></i></li>
           <li role="presentation">&nbsp;{{get_volume()}}&nbsp;</i></li>             
           <li role="presentation" class="liButton"><i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x" aria-hidden="true"></i></li>          
           
@@ -18,12 +18,13 @@
         <ul class="nav nav-pills">          
            <li role="presentation"class="liItem"  v-for="c in contentItmes" ><a v-on:click="play(c)">{{c.name}}</a></li>
         </ul>           
-        <br />                
-        <img v-bind:src="playing.image">
-        <img v-if="about_show" class="boseimg" src="../assets/BoseSpeaker.jpg">
-        <br /> 
-        <br />  
-        <i v-on:click="toggleAbout" class="fa fa-info fa-2x" aria-hidden="true"></i>  
+        <br />   
+        <div v-if="selected_play.item!=''">
+          <img v-bind:src="selected_play.image">
+          <br />  
+          <br />        
+          <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger"> <i class="fa fa-times" aria-hidden="true"></i>&nbsp;Remove  {{selected_play.name}} List</button>
+        </div>    
     </div>
     
   </div>
@@ -40,9 +41,17 @@ export default {
     return {
       BoseSpeakerIP: "10.0.0.49",
       about_show: false,
-      playing: {
-        image: ""
+      selected_play: {
+        item: "",
+        name: "",
+        image: "",                
       },
+      now_playing: {
+        item: "",
+        name: "",
+        image: "",                
+      },
+      ContentItem: '',
       contentItmesStore: "",
       contentItmes: [
         {
@@ -80,9 +89,8 @@ export default {
       volumeObject: '',
       volume: -10,
       bassObject: '',
-      bass: 10,
-      ContentItem: '',
-      now_playing_info: '',
+      bass: 10,      
+      now_playing_status: '',
     }
   },
   created: function () {
@@ -100,6 +108,49 @@ export default {
       }
   },
   methods: {
+    check_inlist(ContentItem){
+      for(var i in this.contentItmes){
+            if (this.contentItmes[i].name != ContentItem.name)
+              continue;
+            if (this.contentItmes[i].image != ContentItem.image)
+              continue; 
+            return true;            
+            break;
+        };
+        return false;
+    },
+    add_content(ContentItem) {
+      if (this.check_inlist(ContentItem)) {
+        alertify.warning(ContentItem.name+" is already in your list");
+        return;
+      };
+      var newConent = {item:"",name:"",image:""};
+      newConent.item = ContentItem.item;
+      newConent.name = ContentItem.name;
+      newConent.image = ContentItem.image;
+      this.contentItmes.push(newConent);
+      localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
+
+    },  
+    remove_content(ContentItem) {
+        if (this.contentItmes.length == 1) {
+            alertify.warning("You must keep at least one item in the list");
+            return;
+        };
+        for(var i in this.contentItmes){
+            if (this.contentItmes[i].name != ContentItem.name)
+              continue;
+            if (this.contentItmes[i].image != ContentItem.image)
+              continue; 
+            this.contentItmes.splice(i, 1);
+            localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
+            break;
+        };
+        for(var i in this.contentItmes){
+            this.play(this.contentItmes[i]);
+            break;
+        }
+    },
     add_item() {
         alertify.warning("Add new item. Not implemented yet");
     },
@@ -188,8 +239,8 @@ export default {
         });
 
     },
-    now_playing() {
-            this.now_playing_info = "Changing Station";
+    get_now_playing() {      
+            this.now_playing_status = "Changing Station";
              // var _url = "http://10.0.0.49:8090/trackInfo";
             var _url =  this.get_ip()+":8090/now_playing"; 
               axios.get(_url)
@@ -198,26 +249,32 @@ export default {
                   console.log(this.boseObject);
                   var startpos = this.boseObject.indexOf("<ContentItem");
                   var endpos = this.boseObject.indexOf("</ContentItem>") + 14;
+                  var _content = "";
                   console.log(startpos);
-                  this.ContentItem = this.boseObject.substring(startpos, endpos); 
-                  this.ContentItem = this.ContentItem.replace(/\"/g,'\\"');
-                   console.log(this.ContentItem);
+                  _content = this.boseObject.substring(startpos, endpos); 
+                  //_content = _content.replace(/\"/g,'\\"');
+                  this.now_playing.item = _content;
+                  console.log(this.now_playing.item);
                   var parser = new DOMParser();
-                  var xmlDoc = parser.parseFromString(this.boseObject,"text/xml");
-                  this.now_playing_info =  xmlDoc.getElementsByTagName("itemName") [0].childNodes[0].nodeValue;                  
+                  var xmlDoc = parser.parseFromString(this.boseObject,"text/xml");                  
+                  this.now_playing.name =  xmlDoc.getElementsByTagName("itemName") [0].childNodes[0].nodeValue; 
+                  this.now_playing.image =  xmlDoc.getElementsByTagName("containerArt") [0].childNodes[0].nodeValue; 
+                  this.now_playing_status = this.now_playing.name;                                 
                 });
                 
       },
       play(ContentItem) {
         this.now_playing_info = "Changing Station";
-        this.playing.image = ContentItem.image;
+        this.selected_play.image = ContentItem.image;
+        this.selected_play.item = ContentItem.name;
+        this.selected_play.name = ContentItem.name;
         var instance = this;
         var _url =  this.get_ip()+":8090/select"; 
                 var _body =  ContentItem.item;                  
                  axios.post(_url, _body)
                  .then(response => {
                    instance.boseObject =  response.data;  
-                   setTimeout(function(){ instance.now_playing()}, 5000);
+                   setTimeout(function(){ instance.get_now_playing()}, 5000);
                   });
 
       },      
