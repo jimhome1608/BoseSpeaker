@@ -2,16 +2,20 @@
   <div class="container">     
     <div class="row"> 
         <ul class="nav nav-pills top_butts">          
-          <li v-on:click="add_content(now_playing)" v-if="now_playing.name!=''" role="presentation" class="liStarButton"><i  class="fa fa-star fa-2x" aria-hidden="true"></i></li>        
-          <li role="presentation">&nbsp;{{now_playing_status}}&nbsp;</i></li>             
           <li role="presentation" class="liButton"><i v-on:click="get_now_playing" class="fa fa-music fa-2x" aria-hidden="true"></i></li>
-          <li role="presentation">&nbsp;{{get_volume()}}&nbsp;</i></li>             
-          <li role="presentation" class="liButton"><i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x" aria-hidden="true"></i></li>          
-          
-          <li role="presentation" class="liButton"><i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x" aria-hidden="true"></i></li>
-          <li role="presentation">&nbsp;{{get_bass()}}</i></li>   
-          <li role="presentation" class="liButton"><i v-on:click="bass_up_down(-1)" class="fa fa-minus fa-2x" aria-hidden="true"></i></li> 
-          <li role="presentation" class="liButton"><i v-on:click="bass_up_down(1)" class="fa fa-plus fa-2x" aria-hidden="true"></i></li> 
+          <li v-on:click="add_content(now_playing)" v-if="now_playing.name!=''" role="presentation" class="liStarButton"><i  class="fa fa-star fa-2x" aria-hidden="true"></i></li>        
+          <li role="presentation" class="liText">&nbsp;{{now_playing_status}}&nbsp;</i></li>                       
+          <li role="presentation" class="liInfo">&nbsp;{{get_volume()}}</i><br />
+              &nbsp;<i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x" aria-hidden="true"></i>
+              &nbsp;&nbsp;
+              <i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x" aria-hidden="true"></i>&nbsp;
+          </li>             
+          <li role="presentation" class="liInfo">&nbsp;{{get_bass()}}</i><br />
+              &nbsp;<i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x" aria-hidden="true"></i>
+               &nbsp;&nbsp;
+              <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x" aria-hidden="true"></i> &nbsp;
+          </li>   
+          <li role="presentation">&nbsp;&nbsp;</i></li>             
           <li role="presentation" class="liButton"><i v-on:click="open_register_screen" class="fa fa-cogs fa-2x" aria-hidden="true"></i></li> 
         </ul>           
         <ul class="nav nav-pills">          
@@ -104,7 +108,8 @@ export default {
       }
       else {
         localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
-      }
+      };
+      this.get_now_playing();
   },
   methods: {
     check_inlist(ContentItem){
@@ -167,17 +172,17 @@ export default {
         this.about_show = !this.about_show;
     },
     get_bass() {
-      if (this.bass == 10) return "";
+      if (this.bass == 10) return "Bass ";
       var range = 9;
       var percent = (this.bass - -9) / range      
       percent =  percent * 100;
       percent = percent.toFixed(0);
-      return "Bass: "+percent+"%";
+      return "Bass "+percent+"%";
 
     },
     get_volume() {
-      if (this.volume == -10) return "";
-      return "Volume: "+this.volume+"%";
+      if (this.volume == -10) return "Volume";
+      return "Volume "+this.volume+"%";
 
     },
      bass_up_down(up_value) {
@@ -318,6 +323,14 @@ h1, h2 {
   cursor: pointer;
   background-color: navy;
   color: white
+}
+.liInfo {
+  background-color: gray;
+  color: white;
+}
+.liText {
+  background-color: navy;
+  color: white;
 }
 .liItem {
   cursor: pointer;
