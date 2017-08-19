@@ -7,8 +7,7 @@
             <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star fa-2x faButt" aria-hidden="true"></i>          
             <i v-on:click="open_register_screen" class="fa fa-cogs fa-2x faButt" aria-hidden="true"></i>
             <h4>{{now_playing_status}}&nbsp;</h4>                                      
-          </li>          
-                                
+          </li>     
           <li role="presentation" class="liInfo">&nbsp;{{get_volume()}}</i><br />
               <i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x faButt" aria-hidden="true"></i>
               <i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x faButt" aria-hidden="true"></i>
@@ -27,7 +26,8 @@
         </ul>           
         <br />   
         <div v-if="selected_play.item!=''">
-          <img v-bind:src="selected_play.image">
+          <hr style="height:1px;border:none;color:#333;background-color:#333;" />
+          <img v-bind:src="selected_play.image"  height="90" width="90">
           <br />  
           <br />        
           <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger"> <i class="fa fa-times" aria-hidden="true"></i>&nbsp;Remove  {{selected_play.name}} List</button>
@@ -149,6 +149,8 @@ export default {
               continue;
             if (this.contentItmes[i].image != ContentItem.image)
               continue; 
+            if (this.contentItmes[i].item != ContentItem.item)
+              continue;   
             this.contentItmes.splice(i, 1);
             localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
             break;
@@ -284,9 +286,10 @@ export default {
                 
       },
       play(ContentItem) {
+        alertify.message("Opening ["+ContentItem.name+"]");
         this.now_playing_info = "Changing Station";
         this.selected_play.image = ContentItem.image;
-        this.selected_play.item = ContentItem.name;
+        this.selected_play.item = ContentItem.item;
         this.selected_play.name = ContentItem.name;
         var instance = this;
         var _url =  instance.get_ip()+":8090/select"; 
