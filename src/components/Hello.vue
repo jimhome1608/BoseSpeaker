@@ -1,11 +1,18 @@
 <template>
   <div class="container">     
     <div class="row"> 
-        <h3 align="left">&nbsp;Bose Speaker Favourites</h3>
+      <div>
+          <h3 align="left">&nbsp;Bose Speaker 
+          <i v-on:click="post_key('POWER')" class="fa fa-stop" aria-hidden="true">&nbsp;Power</i>
+          <i v-on:click="post_key('AUX_INPUT')" class="fa fa-angle-double-right" aria-hidden="true">&nbsp;Input</i>
+          </h3>
+      </div>   
+      <hr>             
         <ul class="nav nav-pills top_butts">          
           <li  role="presentation"  ><i v-on:click="get_now_playing(true)" class="fa fa-music fa-2x faButt" aria-hidden="true"></i>
             <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star fa-2x faButt" aria-hidden="true"></i>          
             <i v-on:click="open_register_screen" class="fa fa-cogs fa-2x faButt" aria-hidden="true"></i>
+            
             <h4>{{now_playing_status}}&nbsp;</h4>                                      
           </li>     
           <li role="presentation" class="liInfo">&nbsp;{{get_volume()}}</i><br />
@@ -224,6 +231,22 @@ export default {
         });
 
     },
+     post_key(_key) {
+       var instance = this;
+       var _url = this.get_ip()+":8090/key";
+       var _body =  '<key state="press" sender="Gabbo">'+_key+'</key>';
+        axios.post(_url, _body)
+        .then(response => {
+            instance.boseObject =  response.data;  
+            console.log(instance.boseObject);
+            _body =  '<key state="release" sender="Gabbo">'+_key+'</key>';
+            axios.post(_url, _body).then(response => {
+              instance.boseObject =  response.data;  
+              console.log(instance.boseObject);  
+              instance.get_now_playing(false);
+            })
+        });
+    },
     volume_up_down(up_value) {
        var instance = this;
        var _url = this.get_ip()+":8090/volume";
@@ -251,7 +274,6 @@ export default {
         .then(response => {
           instance.boseObject =  response.data;  
         });
-
     },
     get_now_playing(showWarning) {      
             this.now_playing_status = "Connecting";
@@ -261,6 +283,11 @@ export default {
               axios.get(_url)
                .then(response => {
                   instance.boseObject =  response.data;
+                  var s = response.data;
+                  if (s.indexOf('STANDBY') > 0) {
+                    instance.now_playing_status = 'STANDBY';
+                    return;
+                  }
                   console.log(instance.boseObject);
                   var startpos = instance.boseObject.indexOf("<ContentItem");
                   var endpos = instance.boseObject.indexOf("</ContentItem>") + 14;
@@ -337,8 +364,13 @@ h1, h2 {
   margin-bottom: 5px;
 }
 .fa {
-   cursor: pointer;
+   cursor: pointer;   
    width: 50px;
+}
+.fa-stop, .fa-angle-double-right {
+  float: right;
+  margin-right: 20px;
+  width: 80px;
 }
 .fa-star {
   color: skyblue;
