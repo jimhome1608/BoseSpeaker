@@ -4,8 +4,8 @@
       <div>
           <h3 align="left">&nbsp;Bose Speaker 
           <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i> 
-          <i v-on:click="post_key('POWER')" class="fa fa-stop" aria-hidden="true">&nbsp;Power</i>
-          <i v-on:click="post_key('AUX_INPUT')" class="fa fa-angle-double-right" aria-hidden="true">&nbsp;Input</i>          
+          <i v-on:click="post_key('POWER')" class="fa fa-stop" aria-hidden="true">&nbsp;P.</i>
+          <i v-on:click="post_key('AUX_INPUT')" class="fa fa-angle-double-right" aria-hidden="true">&nbsp;I.</i>          
           </h3>
       </div>   
       <hr>             
