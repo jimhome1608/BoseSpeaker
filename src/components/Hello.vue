@@ -3,9 +3,8 @@
     <div class="row"> 
       <div>
           <h3 align="left">&nbsp;Bose Speaker 
-          <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i> 
-          <i v-on:click="post_key('POWER')" class="fa fa-stop" aria-hidden="true">&nbsp;P.</i>
-          <i v-on:click="post_key('AUX_INPUT')" class="fa fa-angle-double-right" aria-hidden="true">&nbsp;I.</i>          
+            <i v-on:click="post_key('POWER')" class="fa fa-power-off" aria-hidden="true"></i>         
+          <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i>                     
           </h3>
       </div>   
       <hr>             
@@ -13,19 +12,20 @@
           <h3 align="left">&nbsp;{{now_playing_status}}&nbsp;
           <i  v-on:click="get_now_playing(true)" class="fa fa-music faButt" aria-hidden="true"></i>          
           <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star faButt" aria-hidden="true"></i>
+           <i v-on:click="post_key('AUX_INPUT')" class="fa fa-folder-open-o faButt" aria-hidden="true"></i>                      
           </h3>                                                                                                     
         </div>   
         <div class="view">
-             <i v-on:click="setViewList(true)" class="fa fa-bars fa-2x faButt" aria-hidden="true"></i>
-             <i v-on:click="setViewList(false)" class="fa fa-picture-o fa-2x faButt" aria-hidden="true"></i>
+             <i v-if="!ViewList" v-on:click="setViewList(true)" class="fa fa-bars fa-2x faButt" aria-hidden="true"></i>
+             <i v-if="ViewList" v-on:click="setViewList(false)" class="fa fa-picture-o fa-2x faButt" aria-hidden="true"></i>
              <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
              <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>             
              <i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x faButt" aria-hidden="true"></i>
-             <i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x faButt" aria-hidden="true"></i>
              {{get_volume()}}             
+             <i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x faButt" aria-hidden="true"></i>             
              <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>
-             <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i> 
              {{get_bass()}}
+             <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i>              
          </div>
          <br /> 
          <br />       
@@ -391,7 +391,7 @@ h1, h2 {
    cursor: pointer;   
    width: 50px;
 }
-.fa-stop, .fa-angle-double-right, .fa-cogs {
+.fa-power-off, .fa-cogs {
   float: right;  
   margin-right: 20px;
   width: 80px;
