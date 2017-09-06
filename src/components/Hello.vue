@@ -3,36 +3,33 @@
     <div class="row"> 
       <div>
           <h3 align="left">&nbsp;Bose Speaker 
+          <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i> 
           <i v-on:click="post_key('POWER')" class="fa fa-stop" aria-hidden="true">&nbsp;Power</i>
-          <i v-on:click="post_key('AUX_INPUT')" class="fa fa-angle-double-right" aria-hidden="true">&nbsp;Input</i>
+          <i v-on:click="post_key('AUX_INPUT')" class="fa fa-angle-double-right" aria-hidden="true">&nbsp;Input</i>          
           </h3>
       </div>   
       <hr>             
-        <ul class="nav nav-pills top_butts">          
-          <li  role="presentation"  >
-            <i v-on:click="get_now_playing(true)" class="fa fa-music fa-2x faButt" aria-hidden="true"></i>
-            <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star fa-2x faButt" aria-hidden="true"></i>          
-            <i v-on:click="open_register_screen" class="fa fa-cogs fa-2x faButt" aria-hidden="true"></i>            
-            <h4>{{now_playing_status}}&nbsp;</h4>                                      
-          </li>     
-          <li role="presentation" class="liInfo">&nbsp;{{get_volume()}}<br />
-              <i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x faButt" aria-hidden="true"></i>
-              <i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x faButt" aria-hidden="true"></i>
-          </li>             
-          <li role="presentation" class="liInfo">&nbsp;{{get_bass()}}<br />
-              <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>
-              <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i>
-          </li>             
-          <li role="presentation">&nbsp;&nbsp;</li>             
-        </ul>   
+        <div align="left">   
+          <h3 align="left">&nbsp;{{now_playing_status}}&nbsp;
+          <i  v-on:click="get_now_playing(true)" class="fa fa-music faButt" aria-hidden="true"></i>          
+          <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star faButt" aria-hidden="true"></i>
+          </h3>                                                                                                     
+        </div>   
         <div class="view">
-             <i v-on:click="setViewList(true)" class="fa fa-bars fa-2x " aria-hidden="true"></i>
-             <i v-on:click="setViewList(false)" class="fa fa-picture-o fa-2x " aria-hidden="true"></i>
-             <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x" aria-hidden="true"></i>
-             <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x" aria-hidden="true"></i>
+             <i v-on:click="setViewList(true)" class="fa fa-bars fa-2x faButt" aria-hidden="true"></i>
+             <i v-on:click="setViewList(false)" class="fa fa-picture-o fa-2x faButt" aria-hidden="true"></i>
+             <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
+             <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>             
+             <i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x faButt" aria-hidden="true"></i>
+             <i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x faButt" aria-hidden="true"></i>
+             {{get_volume()}}             
+             <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>
+             <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i> 
+             {{get_bass()}}
          </div>
          <br /> 
-          <br />       
+         <br />       
+         <br /> 
         <ul v-if="ViewList" class="nav nav-pills">          
            <li role="presentation"class="liItem2"  v-for="c in contentItmes"  >
             <h4 v-on:click="play(c)"> {{c.name}}</h4>
@@ -207,17 +204,17 @@ export default {
         this.about_show = !this.about_show;
     },
     get_bass() {
-      if (this.bass == 10) return "Bass ";
+      if (this.bass == 10) return "";
       var range = 9;
       var percent = (this.bass - -9) / range      
       percent =  percent * 100;
       percent = percent.toFixed(0);
-      return "Bass "+percent+"%";
+      return ""+percent+"%";
 
     },
     get_volume() {
-      if (this.volume == -10) return "Volume";
-      return "Volume "+this.volume+"%";
+      if (this.volume == -10) return "";
+      return ""+this.volume+"%";
 
     },
      bass_up_down(up_value) {
@@ -394,16 +391,12 @@ h1, h2 {
    cursor: pointer;   
    width: 50px;
 }
-.fa-stop, .fa-angle-double-right {
+.fa-stop, .fa-angle-double-right, .fa-cogs {
   float: right;  
   margin-right: 20px;
   width: 80px;
 }
 .fa-star {
-  color: skyblue;
-   background-color: black;
-}
-.liStarButton {
   color: skyblue;
 }
 .liButton {  
