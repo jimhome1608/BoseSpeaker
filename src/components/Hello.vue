@@ -9,23 +9,40 @@
       </div>   
       <hr>             
         <ul class="nav nav-pills top_butts">          
-          <li  role="presentation"  ><i v-on:click="get_now_playing(true)" class="fa fa-music fa-2x faButt" aria-hidden="true"></i>
+          <li  role="presentation"  >
+            <i v-on:click="get_now_playing(true)" class="fa fa-music fa-2x faButt" aria-hidden="true"></i>
             <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star fa-2x faButt" aria-hidden="true"></i>          
-            <i v-on:click="open_register_screen" class="fa fa-cogs fa-2x faButt" aria-hidden="true"></i>
-            
+            <i v-on:click="open_register_screen" class="fa fa-cogs fa-2x faButt" aria-hidden="true"></i>            
             <h4>{{now_playing_status}}&nbsp;</h4>                                      
           </li>     
-          <li role="presentation" class="liInfo">&nbsp;{{get_volume()}}</i><br />
+          <li role="presentation" class="liInfo">&nbsp;{{get_volume()}}<br />
               <i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x faButt" aria-hidden="true"></i>
               <i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x faButt" aria-hidden="true"></i>
           </li>             
-          <li role="presentation" class="liInfo">&nbsp;{{get_bass()}}</i><br />
+          <li role="presentation" class="liInfo">&nbsp;{{get_bass()}}<br />
               <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>
               <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i>
           </li>   
-          <li role="presentation">&nbsp;&nbsp;</i></li>             
+          <li class="view" role="presentation">View<br />
+             &nbsp;
+            <input type="checkbox" v-on:click="toggleshowDeveloperOptions" v-model="ViewList">
+            <label class="view" for="checkbox">&nbsp;List&nbsp;&nbsp;</label>
+          </li>
+          <li role="presentation">&nbsp;&nbsp;</li>             
+        </ul>   
+                
+        <ul v-if="ViewList" class="nav nav-pills">          
+           <li role="presentation"class="liItem2"  v-for="c in contentItmes"  >
+            <h4 v-on:click="play(c)"> {{c.name}}</h4>
+            <div class="h4"v-if="isPausable(c)" >
+              <i v-on:click="post_key('PAUSE')" class="fa fa-pause " aria-hidden="true">&nbsp;Pause</i>
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              <i v-on:click="post_key('PLAY')" class="fa fa-play" aria-hidden="true">&nbsp;Play</i>
+            <br />
+            </div>            
+           </li>
         </ul>           
-        <ul class="nav nav-pills">          
+        <ul v-if="!ViewList" class="nav nav-pills">          
            <li role="presentation"class="liItem"  v-for="c in contentItmes" v-on:click="play(c)" >
             <div style="color:white;white-space: nowrap;"> {{c.name}}</div>
              <img v-bind:src=c.image height="170" width="170">
@@ -53,6 +70,7 @@ export default {
   data () {
     return {
       BoseSpeakerIP: "10.0.0.49",
+      ViewList: true,
       about_show: false,
       selected_play: {
         item: "",
@@ -67,7 +85,7 @@ export default {
       ContentItem: '',
       contentItmesStore: "",
       contentItmes: [
-        {
+        {                                  
 	    	item: "<ContentItem source=\"INTERNET_RADIO\" location=\"77625\" sourceAccount=\"\" isPresetable=\"true\"><itemName>JAZZfm 106.5</itemName><containerArt>http://item.radio456.com/007452/logo/logo-77625.jpg</containerArt></ContentItem>",
 		    name: "JAZZfm 106.5",
         image: "http://item.radio456.com/007452/logo/logo-77625.jpg"
@@ -232,18 +250,18 @@ export default {
 
     },
      post_key(_key) {
+       alertify.warning(_key);
        var instance = this;
        var _url = this.get_ip()+":8090/key";
        var _body =  '<key state="press" sender="Gabbo">'+_key+'</key>';
         axios.post(_url, _body)
         .then(response => {
-            instance.boseObject =  response.data;  
-            console.log(instance.boseObject);
+            console.log(response.data);
             _body =  '<key state="release" sender="Gabbo">'+_key+'</key>';
             axios.post(_url, _body).then(response => {
-              instance.boseObject =  response.data;  
-              console.log(instance.boseObject);  
-              instance.get_now_playing(false);
+              console.log(response.data);
+              if (_key == 'POWER')
+                instance.get_now_playing(false);
             })
         });
     },
@@ -311,6 +329,12 @@ export default {
                     }
                 });
                 
+      },
+      isPausable(ContentItem) {
+        var s = ContentItem.item;
+        if (s.indexOf('TUNEIN') > 0) return true;
+        // if (s.indexOf('LOCAL_MUSIC') > 0) return true;          
+        return false;
       },
       play(ContentItem) {
         alertify.message("Opening ["+ContentItem.name+"]");
@@ -400,6 +424,23 @@ h1, h2 {
 }
 .liItem {
   cursor: pointer;
+  background-color: black;  
+  margin-top: 10px;
+  height: 190px;
+  width: 190px;
+}
+.liItem2 {
+  cursor: pointer;  
+  border: 1px solid black;
+  background-color:darkgray;
+  color: black;
+  margin-top: 10px;
+  margin-left: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.ViewList{
+  cursor: pointer;
   background-color: black;
   margin-top: 10px;
   height: 190px;
@@ -410,5 +451,9 @@ h1, h2 {
 }
 a {
   color: skyblue;
+}
+.view {
+  background-color: silver;
+  font-weight: lighter;
 }
 </style>
