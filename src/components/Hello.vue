@@ -22,24 +22,20 @@
           <li role="presentation" class="liInfo">&nbsp;{{get_bass()}}<br />
               <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>
               <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i>
-          </li>   
-          <li class="view" role="presentation">View<br />
-             &nbsp;
-            <input type="checkbox" v-on:click="toggleshowDeveloperOptions" v-model="ViewList">
-            <label class="view" for="checkbox">&nbsp;List&nbsp;&nbsp;</label>
-          </li>
+          </li>             
           <li role="presentation">&nbsp;&nbsp;</li>             
         </ul>   
-                
+        <div class="view">
+             <i v-on:click="setViewList(true)" class="fa fa-bars fa-2x " aria-hidden="true"></i>
+             <i v-on:click="setViewList(false)" class="fa fa-picture-o fa-2x " aria-hidden="true"></i>
+             <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x" aria-hidden="true"></i>
+             <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x" aria-hidden="true"></i>
+         </div>
+         <br /> 
+          <br />       
         <ul v-if="ViewList" class="nav nav-pills">          
            <li role="presentation"class="liItem2"  v-for="c in contentItmes"  >
             <h4 v-on:click="play(c)"> {{c.name}}</h4>
-            <div class="h4"v-if="isPausable(c)" >
-              <i v-on:click="post_key('PAUSE')" class="fa fa-pause " aria-hidden="true">&nbsp;Pause</i>
-              &nbsp;&nbsp;&nbsp;&nbsp;
-              <i v-on:click="post_key('PLAY')" class="fa fa-play" aria-hidden="true">&nbsp;Play</i>
-            <br />
-            </div>            
            </li>
         </ul>           
         <ul v-if="!ViewList" class="nav nav-pills">          
@@ -69,6 +65,7 @@ export default {
   name: 'hello',
   data () {
     return {
+      currentlyPausible: false,
       BoseSpeakerIP: "10.0.0.49",
       ViewList: true,
       about_show: false,
@@ -123,7 +120,7 @@ export default {
       bass: 10,      
       now_playing_status: '',
     }
-  },
+  },  
   created: function () {
       if (localStorage.getItem("BoseSpeakerIP") != null) 
         this.BoseSpeakerIP = localStorage.getItem('BoseSpeakerIP');
@@ -140,6 +137,9 @@ export default {
       this.get_now_playing(false);
   },
   methods: {
+    setViewList(state) {
+      this.ViewList = state;
+    },
     check_inlist(ContentItem){
       for(var i in this.contentItmes){
             if (this.contentItmes[i].name != ContentItem.name)
@@ -337,6 +337,9 @@ export default {
         return false;
       },
       play(ContentItem) {
+        this.currentlyPausible = false;
+        if (this.isPausable(ContentItem))
+          this.currentlyPausible = true;; 
         alertify.message("Opening ["+ContentItem.name+"]");
         this.now_playing_info = "Changing Station";
         this.selected_play.image = ContentItem.image;
@@ -392,7 +395,7 @@ h1, h2 {
    width: 50px;
 }
 .fa-stop, .fa-angle-double-right {
-  float: right;
+  float: right;  
   margin-right: 20px;
   width: 80px;
 }
@@ -453,7 +456,8 @@ a {
   color: skyblue;
 }
 .view {
-  background-color: silver;
+  float: left;
+  background-color: white;
   font-weight: lighter;
 }
 </style>
