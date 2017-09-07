@@ -12,12 +12,14 @@
           <h3 align="left">&nbsp;{{now_playing_status}}&nbsp;
           <i  v-on:click="get_now_playing(true)" class="fa fa-music faButt" aria-hidden="true"></i>          
           <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star faButt" aria-hidden="true"></i>
-           <i v-on:click="post_key('AUX_INPUT')" class="fa fa-folder-open-o faButt" aria-hidden="true"></i>                      
+           <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>                      
+           <i v-if="openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-open-o faButt" aria-hidden="true">..</i>   
+           <i v-if="openChangeInput" v-on:click="post_key('AUX_INPUT')" class="fa fa-microphone faButt" aria-hidden="true"></i>   
           </h3>                                                                                                     
         </div>   
         <div class="view">
              <i v-if="!ViewList" v-on:click="setViewList(true)" class="fa fa-bars fa-2x faButt" aria-hidden="true"></i>
-             <i v-if="ViewList" v-on:click="setViewList(false)" class="fa fa-picture-o fa-2x faButt" aria-hidden="true"></i>
+             <i v-if="ViewList" v-on:click="setViewList(false)" class="fa fa-id-card-o fa-2x faButt" aria-hidden="true"></i>
              <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
              <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>             
              <i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x faButt" aria-hidden="true"></i>
@@ -31,10 +33,17 @@
          <br />       
          <br /> 
         <ul v-if="ViewList" class="nav nav-pills">          
-           <li role="presentation"class="liItem2"  v-for="c in contentItmes"  >
-            <h4 v-on:click="play(c)"> {{c.name}}</h4>
+           <li v-if="isSameContent(c,currentPlayingContent)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
+            <h4  v-if="isSameContent(c,currentPlayingContent)" v-on:click="play(c)"> {{c.name}}</h4>
+            <h4 v-if="!isSameContent(c,currentPlayingContent)" v-on:click="play(c)"> {{c.name}}</h4>
            </li>
-        </ul>           
+        </ul>     
+        <ul v-if="ViewList" class="nav nav-pills">          
+           <li v-if="!isSameContent(c,currentPlayingContent)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
+            <h4  v-if="isSameContent(c,currentPlayingContent)" v-on:click="play(c)"> {{c.name}}</h4>
+            <h4 v-if="!isSameContent(c,currentPlayingContent)" v-on:click="play(c)"> {{c.name}}</h4>
+           </li>
+        </ul>         
         <ul v-if="!ViewList" class="nav nav-pills">          
            <li role="presentation"class="liItem"  v-for="c in contentItmes" v-on:click="play(c)" >
             <div style="color:white;white-space: nowrap;"> {{c.name}}</div>
@@ -62,7 +71,9 @@ export default {
   name: 'hello',
   data () {
     return {
+      currentPlayingContent: {},
       currentlyPausible: false,
+      openChangeInput: false,
       BoseSpeakerIP: "10.0.0.49",
       ViewList: true,
       about_show: false,
@@ -134,6 +145,11 @@ export default {
       this.get_now_playing(false);
   },
   methods: {
+    isSameContent(a,b) {
+        if (a.item == b.item)
+          return true;
+        return false;
+    },
     setViewList(state) {
       this.ViewList = state;
     },
@@ -202,6 +218,9 @@ export default {
      },
     toggleAbout () {
         this.about_show = !this.about_show;
+    },
+    toggle_openChangeInput () {
+      this.openChangeInput = ! this.openChangeInput;
     },
     get_bass() {
       if (this.bass == 10) return "";
@@ -329,7 +348,10 @@ export default {
       },
       isPausable(ContentItem) {
         var s = ContentItem.item;
-        if (s.indexOf('TUNEIN') > 0) return true;
+        if (s.indexOf('TUNEIN') > 0) {
+          if (s.indexOf('tracklisturl') > 0)
+            return true;
+        } 
         // if (s.indexOf('LOCAL_MUSIC') > 0) return true;          
         return false;
       },
@@ -347,7 +369,8 @@ export default {
         var _body =  ContentItem.item;                  
           axios.post(_url, _body)
           .then(response => {
-            instance.boseObject =  response.data;  
+            instance.boseObject =  response.data; 
+            instance.currentPlayingContent = ContentItem;
             setTimeout(function(){ instance.get_now_playing(true)}, 5000);
           })
           .catch(function (response) {
@@ -452,5 +475,9 @@ a {
   float: left;
   background-color: white;
   font-weight: lighter;
+}
+.current_selection {
+  background-color: rebeccapurple;
+  color: white;
 }
 </style>
