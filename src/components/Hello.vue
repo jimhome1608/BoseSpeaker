@@ -15,6 +15,7 @@
            <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>                      
            <i v-if="openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-open-o faButt" aria-hidden="true">..</i>   
            <i v-if="openChangeInput" v-on:click="post_key('AUX_INPUT')" class="fa fa-microphone faButt" aria-hidden="true"></i>   
+           <i v-if="openChangeInput" v-on:click="open_random_content" class="fa fa-exclamation faButt" aria-hidden="true"></i>   
           </h3>                                                                                                     
         </div>   
         <div class="view">
@@ -354,6 +355,17 @@ export default {
         } 
         // if (s.indexOf('LOCAL_MUSIC') > 0) return true;          
         return false;
+      },
+      open_random_content() {
+        var random_location = Math.floor(Math.random() * 100000)+1;
+        var random_content = 
+         {                                  
+	    	item: "<ContentItem source=\"INTERNET_RADIO\" location=\""+random_location+"\" sourceAccount=\"\" isPresetable=\"true\"><itemName>JAZZfm 106.5</itemName><containerArt>http://item.radio456.com/007452/logo/logo-77625.jpg</containerArt></ContentItem>",
+		    name: "Random -> "+random_location,
+        image: ""
+	      };
+        this.play(random_content);
+
       },
       play(ContentItem) {
         this.currentlyPausible = false;
