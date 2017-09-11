@@ -4,7 +4,7 @@
       <div>
           <h3 align="left">&nbsp;Bose Speaker 
             <i v-on:click="post_key('POWER')" class="fa fa-power-off" aria-hidden="true"></i>         
-          <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i>                     
+            <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i>              
           </h3>
       </div>   
       <hr>             
@@ -145,7 +145,20 @@ export default {
       };
       this.get_now_playing(false);
   },
+  computed: {
+  },
   methods: {
+    goodbye() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    },
     isSameContent(a,b) {
         if (a.item == b.item)
           return true;
@@ -309,12 +322,13 @@ export default {
         .then(response => {
           instance.boseObject =  response.data;  
         });
-    },
+    },    
     get_now_playing(showWarning) {      
             this.now_playing_status = "Connecting";
              // var _url = "http://10.0.0.49:8090/trackInfo";
             var instance = this;
             var _url =  instance.get_ip()+":8090/now_playing"; 
+            console.log(_url);
               axios.get(_url)
                .then(response => {
                   instance.boseObject =  response.data;
@@ -339,6 +353,8 @@ export default {
                   instance.now_playing_status = instance.now_playing.name;                                 
                 })
                 .catch(function (response) {
+                    console.log('get_now_playing');
+                    console.log(response);
                     instance.now_playing_status = 'No Connection';
                     if (showWarning == true) {
                         instance.now_playing_status = "Failed to connect on "+instance.BoseSpeakerIP+".  Click Cogs to change settings";
@@ -426,7 +442,7 @@ h1, h2 {
    cursor: pointer;   
    width: 50px;
 }
-.fa-power-off, .fa-cogs {
+.fa-power-off, .fa-cogs, .fa-times {
   float: right;  
   margin-right: 20px;
   width: 80px;
