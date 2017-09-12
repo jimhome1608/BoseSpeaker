@@ -349,7 +349,8 @@ export default {
                   var parser = new DOMParser();
                   var xmlDoc = parser.parseFromString(instance.boseObject,"text/xml");                  
                   instance.now_playing.name =  xmlDoc.getElementsByTagName("itemName") [0].childNodes[0].nodeValue; 
-                  instance.now_playing.image =  xmlDoc.getElementsByTagName("containerArt") [0].childNodes[0].nodeValue; 
+                  if (xmlDoc.getElementsByTagName("containerArt").length)
+                     instance.now_playing.image =  xmlDoc.getElementsByTagName("containerArt") [0].childNodes[0].nodeValue; 
                   instance.now_playing_status = instance.now_playing.name;                                 
                 })
                 .catch(function (response) {
