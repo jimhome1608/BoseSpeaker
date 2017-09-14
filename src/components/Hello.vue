@@ -7,7 +7,8 @@
             <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i>              
           </h3>
       </div>   
-      <hr>             
+      <hr>   
+  
         <div align="left">   
           <h3 align="left">&nbsp;{{now_playing_status}}&nbsp;
           <i  v-on:click="get_now_playing(true)" class="fa fa-music faButt" aria-hidden="true"></i>          
@@ -29,20 +30,23 @@
              <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>
              {{get_bass()}}
              <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i>              
-         </div>
+         </div>         
+         <br />
          <br /> 
-         <br />       
          <br /> 
+         <div align="left"> 
+          <input v-model="rbViewOptions"  type="radio" name="gender" value="0"> All
+          <input v-model="rbViewOptions" type="radio" name="gender" value="1"> Internet Radio
+          <input v-model="rbViewOptions" type="radio" name="gender" value="2"> Local Files
+        </div>  
         <ul v-if="ViewList" class="nav nav-pills">          
-           <li v-if="isSameContent(c,currentPlayingContent)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
-            <h4  v-if="isSameContent(c,currentPlayingContent)" v-on:click="play(c)"> {{c.name}}</h4>
-            <h4 v-if="!isSameContent(c,currentPlayingContent)" v-on:click="play(c)"> {{c.name}}</h4>
+           <li v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
+            <h4  v-on:click="play(c)"> {{c.name}}</h4>
            </li>
         </ul>     
         <ul v-if="ViewList" class="nav nav-pills">          
-           <li v-if="!isSameContent(c,currentPlayingContent)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
-            <h4  v-if="isSameContent(c,currentPlayingContent)" v-on:click="play(c)"> {{c.name}}</h4>
-            <h4 v-if="!isSameContent(c,currentPlayingContent)" v-on:click="play(c)"> {{c.name}}</h4>
+           <li v-if="notCurrentlyPlayAndNotFiltered(c)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
+            <h4  v-on:click="play(c)"> {{c.name}}</h4>
            </li>
         </ul>         
         <ul v-if="!ViewList" class="nav nav-pills">          
@@ -72,6 +76,7 @@ export default {
   name: 'hello',
   data () {
     return {
+      rbViewOptions: 0,
       currentPlayingContent: {},
       currentlyPausible: false,
       openChangeInput: false,
@@ -158,6 +163,31 @@ export default {
         } else if (document.msExitFullscreen) {
             document.msExitFullscreen();
         }
+    },
+    isNotFiltered(c) {
+      if (this.rbViewOptions == 0)
+        return true;
+      if (this.rbViewOptions == 1)   {
+        if (c.item.indexOf("INTERNET_RADIO") > 0)
+          return true;
+      }
+       if (this.rbViewOptions == 2)   {
+        if (c.item.indexOf("STORED_MUSIC") > 0)
+          return true;
+      }
+      return false;
+    },
+    currentlyPlaying(c) {
+        if (c.item == this.currentPlayingContent.item) 
+          return true;
+        return false;
+    },
+    notCurrentlyPlayAndNotFiltered(c) {
+      if (!this.currentlyPlaying(c)) {
+        if (this.isNotFiltered(c))
+          return true;
+      };
+      return false;  
     },
     isSameContent(a,b) {
         if (a.item == b.item)
@@ -284,6 +314,8 @@ export default {
        var instance = this;
        var _url = this.get_ip()+":8090/key";
        var _body =  '<key state="press" sender="Gabbo">'+_key+'</key>';
+       console.log(_url);
+       console.log(_body);
         axios.post(_url, _body)
         .then(response => {
             console.log(response.data);
@@ -476,6 +508,10 @@ h1, h2 {
   margin-top: 10px;
   height: 190px;
   width: 190px;
+}
+input {
+  margin-top: 10px;
+  margin-left: 20px;
 }
 .liItem2 {
   cursor: pointer;  
