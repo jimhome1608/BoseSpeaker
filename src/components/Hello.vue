@@ -34,10 +34,10 @@
          <br />
          <br /> 
          <br /> 
-         <div align="left"> 
-          <input v-model="rbViewOptions"  type="radio" name="gender" value="0"> All
-          <input v-model="rbViewOptions" type="radio" name="gender" value="1"> Internet Radio
-          <input v-model="rbViewOptions" type="radio" name="gender" value="2"> Local Files
+         <div  align="left"> 
+          <input class="viewOptions" v-model="rbViewOptions"  type="radio" name="gender" value="0"> All
+          <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="1"> Internet Radio
+          <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="2"> Local Files
         </div>  
         <ul v-if="ViewList" class="nav nav-pills">          
            <li v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
@@ -56,12 +56,20 @@
            </li>
         </ul>           
         <br />   
-        <div v-if="selected_play.item!=''">
+        <div v-if="selected_play.item!=''">          
           <hr style="height:1px;border:none;color:#333;background-color:#333;" />
-          <img v-bind:src="selected_play.image"  height="90" width="90">
-          <br />  
-          <br />        
-          <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger"> <i class="fa fa-times" aria-hidden="true"></i>&nbsp;Remove  {{selected_play.name}} List</button>
+          <img v-if="selected_play.image!=''" v-bind:src="selected_play.image"  height="90" width="90">          
+           <br /> 
+           <div class="input-group editname">             
+              <span class="input-group-btn">
+                <button class="btn btn-primary" type="button" v-on:click="saveEditName(selected_play, edtName)" >
+                  Save
+                </button>
+              </span>
+              <input type="text" class="form-control" placeholder="" v-model="edtName">
+            </div><!-- /input-group -->
+            <br />
+          <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger">Remove </button>
         </div>    
     </div>
     
@@ -76,6 +84,7 @@ export default {
   name: 'hello',
   data () {
     return {
+      edtName: "",      
       rbViewOptions: 0,
       currentPlayingContent: {},
       currentlyPausible: false,
@@ -220,7 +229,22 @@ export default {
       this.contentItmes.push(newConent);
       localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
 
-    },  
+    }, 
+    saveEditName(ContentItem, edtName) {
+      console.log('saveEditName start ' +edtName);
+      for(var i in this.contentItmes){            
+            if (this.contentItmes[i].name != ContentItem.name)
+              continue;
+            console.log(this.contentItmes[i].name);  
+            if (this.contentItmes[i].image != ContentItem.image)
+              continue; 
+            console.log('saveEditName');
+            this.contentItmes[i].name =  this.edtName;  
+            localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));        
+            break;
+        };
+      localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
+    }, 
     remove_content(ContentItem) {
         if (this.contentItmes.length == 1) {
             alertify.warning("You must keep at least one item in the list");
@@ -419,8 +443,9 @@ export default {
       play(ContentItem) {
         this.currentlyPausible = false;
         if (this.isPausable(ContentItem))
-          this.currentlyPausible = true;; 
+          this.currentlyPausible = true;
         alertify.message("Opening ["+ContentItem.name+"]");
+        this.edtName = ContentItem.name;
         this.now_playing_info = "Changing Station";
         this.selected_play.image = ContentItem.image;
         this.selected_play.item = ContentItem.item;
@@ -475,10 +500,13 @@ h1, h2 {
    cursor: pointer;   
    width: 50px;
 }
-.fa-power-off, .fa-cogs, .fa-times {
+.fa-power-off, .fa-cogs {
   float: right;  
   margin-right: 20px;
   width: 80px;
+}
+.fa-times, .fa-pencil-square-o  {
+  float: right; 
 }
 .fa-star {
   color: skyblue;
@@ -509,7 +537,7 @@ h1, h2 {
   height: 190px;
   width: 190px;
 }
-input {
+.viewOptions {
   margin-top: 10px;
   margin-left: 20px;
 }
@@ -544,5 +572,9 @@ a {
 .current_selection {
   background-color: rebeccapurple;
   color: white;
+}
+.editname {
+  padding-left: 50px;
+  padding-right: 50px;
 }
 </style>
