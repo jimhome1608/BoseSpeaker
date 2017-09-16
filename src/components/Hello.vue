@@ -338,7 +338,8 @@ export default {
      },
     open_register_screen() {
          var instance = this;
-         alertify.confirm('Open Settings?', function(){ instance.$router.push('/register');  }, function(){ return;}).setHeader('<em> Bose Speaker </em> '); ;
+         instance.$router.push('/register');
+         //alertify.confirm('Open Settings?', function(){ instance.$router.push('/register');  }, function(){ return;}).setHeader('<em> Bose Speaker </em> '); ;
         //this.do_open_register_screen();
      },
     toggleAbout () {

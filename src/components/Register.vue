@@ -1,7 +1,7 @@
 <template>
     <div>
         <h3>Bose Speaker IP Address:</h3>
-        <div class="container" align="left">
+        <div class="container">
             <div class="input-group">
               <span class="input-group-btn">
                 <button class="btn btn-danger" type="button" v-on:click="close_settings" >
@@ -15,17 +15,17 @@
               </span>
               <input type="text" class="form-control" placeholder="Enter IP of Bose Speaker" v-model="BoseSpeakerIP">
             </div><!-- /input-group -->
-            <h4 v-bind:class="get_class()">{{statusline}}</h4>
-             
-             <br />
-            <div class="author well">
+            <h4 v-bind:class="get_class()">{{statusline}}</h4>             
+             <br />             
+             <img src="../assets/Bose03.png" height="320" width="380"/>
+            <div class="author well">               
             <strong>Author:</strong> <br />
             Jim Clark<br />
             <a href="http://www.jimclark.net.au/" target="_blank">www.jimclark.net.au/</a><br />
             <i class="fa fa-envelope-o" aria-hidden="true"></i>
             <a href="mailto:jim@jimclark.com.au?Subject=Bose Speaker" target="_top">jim@jimclark.com.au</a><br />
-            </div>
-        </div>
+            </div>             
+        </div>        
         
     </div>
 </template>
