@@ -13,26 +13,31 @@
           <h3 align="left">&nbsp;{{now_playing_status}}&nbsp;
           <i  v-on:click="get_now_playing(true)" class="fa fa-music faButt" aria-hidden="true"></i>          
           <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star faButt" aria-hidden="true"></i>
-           <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>                                 
-           <i v-if="openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-open-o faButt" aria-hidden="true">..</i>   
-           <i v-if="openChangeInput" v-on:click="post_key('AUX_INPUT')" class="fa fa-microphone faButt" aria-hidden="true"></i>   
-           <i v-if="openChangeInput" v-on:click="open_random_content" class="fa fa-exclamation faButt" aria-hidden="true"></i>   
-           <i v-if="openChangeInput" v-on:click="email_contents" class="fa fa-share faButt" aria-hidden="true"></i>   
-
+          <i v-if="!ViewList" v-on:click="setViewList(true)" class="fa fa-bars faButt" aria-hidden="true"></i>
+          <i v-if="ViewList" v-on:click="setViewList(false)" class="fa fa-id-card-o faButt" aria-hidden="true"></i>
+          <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>     
+           <div class="blockButtons">                               
+              <i v-if="openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-open-o faButt" aria-hidden="true">..</i>   
+              <i v-if="openChangeInput" v-on:click="post_key('AUX_INPUT')" class="fa fa-microphone faButt" aria-hidden="true"></i>   
+              <i v-if="openChangeInput" v-on:click="open_random_content" class="fa fa-exclamation faButt" aria-hidden="true"></i>   
+              <i v-if="openChangeInput" v-on:click="email_contents" class="fa fa-share faButt" aria-hidden="true"></i>   
+           </div> 
           </h3>                                                                                                     
         </div>   
         <div class="view">
-             <i v-on:click="sortPlayList" class="fa fa-refresh fa-2x faButt" aria-hidden="true"></i>            
-             <i v-if="!ViewList" v-on:click="setViewList(true)" class="fa fa-bars fa-2x faButt" aria-hidden="true"></i>
-             <i v-if="ViewList" v-on:click="setViewList(false)" class="fa fa-id-card-o fa-2x faButt" aria-hidden="true"></i>
+             <i v-on:click="sortPlayList" class="fa fa-refresh fa-2x faButt" aria-hidden="true"></i>                         
              <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
              <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>             
-             <i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x faButt" aria-hidden="true"></i>
-             {{get_volume()}}             
-             <i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x faButt" aria-hidden="true"></i>             
-             <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>
-             {{get_bass()}}
-             <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i>              
+             <div class="blockButtons">   
+                <i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x faButt" aria-hidden="true"></i>
+                {{get_volume()}}               
+                <i v-on:click="volume_up_down(1)" class="fa fa-volume-up fa-2x faButt" aria-hidden="true"></i>             
+             </div>
+             <div class="blockButtons">           
+                <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>             
+                {{get_bass()}}
+                <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i>              
+             </div>
          </div>                  
          <br /> 
          <br /> 
@@ -531,6 +536,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.blockButtons {
+  display: inline-block;
+}
 .container {
   margin-left: 10px;
 }
