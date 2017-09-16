@@ -13,13 +13,16 @@
           <h3 align="left">&nbsp;{{now_playing_status}}&nbsp;
           <i  v-on:click="get_now_playing(true)" class="fa fa-music faButt" aria-hidden="true"></i>          
           <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star faButt" aria-hidden="true"></i>
-           <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>                      
+           <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>                                 
            <i v-if="openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-open-o faButt" aria-hidden="true">..</i>   
            <i v-if="openChangeInput" v-on:click="post_key('AUX_INPUT')" class="fa fa-microphone faButt" aria-hidden="true"></i>   
            <i v-if="openChangeInput" v-on:click="open_random_content" class="fa fa-exclamation faButt" aria-hidden="true"></i>   
+           <i v-if="openChangeInput" v-on:click="email_contents" class="fa fa-share faButt" aria-hidden="true"></i>   
+
           </h3>                                                                                                     
         </div>   
         <div class="view">
+             <i v-on:click="sortPlayList" class="fa fa-refresh fa-2x faButt" aria-hidden="true"></i>            
              <i v-if="!ViewList" v-on:click="setViewList(true)" class="fa fa-bars fa-2x faButt" aria-hidden="true"></i>
              <i v-if="ViewList" v-on:click="setViewList(false)" class="fa fa-id-card-o fa-2x faButt" aria-hidden="true"></i>
              <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
@@ -30,17 +33,23 @@
              <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>
              {{get_bass()}}
              <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i>              
-         </div>         
-         <br />
+         </div>                  
          <br /> 
          <br /> 
-         <div  align="left"> 
+         <br /> 
+         <div v-if="sortOrder!=''" align="left">  
+             Sorted: <mark>{{sortOrder}} </mark>
+         </div> 
+         <div  align="left">                      
+           
           <input class="viewOptions" v-model="rbViewOptions"  type="radio" name="gender" value="0"> All
           <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="1"> Internet Radio
           <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="2"> Local Files
         </div>  
         <ul v-if="ViewList" class="nav nav-pills">          
            <li v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
+            <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
+            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt" aria-hidden="true"></i>
             <h4  v-on:click="play(c)"> {{c.name}}</h4>
            </li>
         </ul>     
@@ -57,7 +66,7 @@
         </ul>           
         <br />   
         <div v-if="selected_play.item!=''">          
-          <hr style="height:1px;border:none;color:#333;background-color:#333;" />
+          <hr style="height:1px;border:none;color:#333;background-color:#333;" />         
           <img v-if="selected_play.image!=''" v-bind:src="selected_play.image"  height="90" width="90">          
            <br /> 
            <div class="input-group editname">             
@@ -79,11 +88,13 @@
 
 <script>
 import axios from 'axios';
+import moment from 'moment';
 
 export default {
   name: 'hello',
   data () {
     return {
+      sortOrder: "",
       edtName: "",      
       rbViewOptions: 0,
       currentPlayingContent: {},
@@ -155,13 +166,49 @@ export default {
           console.log("loaded from local storage");
       }
       else {
-        localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
+        this.saveToLocalStorage();
       };
       this.get_now_playing(false);
   },
   computed: {
   },
   methods: {
+    saveToLocalStorage() {
+        localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes)); 
+    }, 
+    sortPlayList() {
+      function compareAscName(a,b) {
+        if (a.name < b.name)
+          return -1;
+        if (a.name > b.name)
+          return 1;
+        return 0;
+      }
+      function compareDescName(a,b) {
+        if (a.name > b.name)
+          return -1;
+        if (a.name < b.name)
+          return 1;
+        return 0;
+      }
+
+      function compareLastPlayed(a,b) {  
+        if (a.lastPlayed == undefined)  a.lastPlayed = 0;
+        if (b.lastPlayed == undefined)  b.lastPlayed = 0;
+        return b.lastPlayed - a.lastPlayed;
+      }
+
+      if (this.sortOrder == "by Name") {
+        this.sortOrder = "by Last Play";
+        this.contentItmes.sort(compareLastPlayed);
+      }
+      else {
+        this.sortOrder = "by Name";
+        this.contentItmes.sort(compareAscName);
+      }
+      this.saveToLocalStorage();
+
+    },
     goodbye() {
         if (document.exitFullscreen) {
             document.exitFullscreen();
@@ -184,6 +231,11 @@ export default {
         if (c.item.indexOf("STORED_MUSIC") > 0)
           return true;
       }
+      return false;
+    },
+    canDoNextTrack(c) {
+      if (c.item.indexOf("STORED_MUSIC") > 0)
+          return true;
       return false;
     },
     currentlyPlaying(c) {
@@ -227,7 +279,7 @@ export default {
       newConent.name = ContentItem.name;
       newConent.image = ContentItem.image;
       this.contentItmes.push(newConent);
-      localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
+      this.saveToLocalStorage();
 
     }, 
     saveEditName(ContentItem, edtName) {
@@ -240,10 +292,10 @@ export default {
               continue; 
             console.log('saveEditName');
             this.contentItmes[i].name =  this.edtName;  
-            localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));        
+            this.saveToLocalStorage();
             break;
         };
-      localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
+      this.saveToLocalStorage();
     }, 
     remove_content(ContentItem) {
         if (this.contentItmes.length == 1) {
@@ -258,7 +310,7 @@ export default {
             if (this.contentItmes[i].item != ContentItem.item)
               continue;   
             this.contentItmes.splice(i, 1);
-            localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes));
+            this.saveToLocalStorage();
             break;
         };
         for(var i in this.contentItmes){
@@ -429,6 +481,9 @@ export default {
         // if (s.indexOf('LOCAL_MUSIC') > 0) return true;          
         return false;
       },
+      email_contents() {
+        alertify.warning("email contents not done yet");
+      },
       open_random_content() {
         var random_location = Math.floor(Math.random() * 100000)+1;
         var random_content = 
@@ -450,6 +505,9 @@ export default {
         this.selected_play.image = ContentItem.image;
         this.selected_play.item = ContentItem.item;
         this.selected_play.name = ContentItem.name;
+        ContentItem.lastPlayed = moment().unix();
+        this.saveToLocalStorage();
+        console.log(ContentItem.lastPlayed);
         var instance = this;
         var _url =  instance.get_ip()+":8090/select"; 
         var _body =  ContentItem.item;                  
