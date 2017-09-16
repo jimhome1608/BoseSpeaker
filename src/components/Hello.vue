@@ -16,11 +16,11 @@
           <i v-if="!ViewList" v-on:click="setViewList(true)" class="fa fa-bars faButt" aria-hidden="true"></i>
           <i v-if="ViewList" v-on:click="setViewList(false)" class="fa fa-id-card-o faButt" aria-hidden="true"></i>
           <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>     
-           <div class="blockButtons">                               
+           <div class="blockButtons">                                             
               <i v-if="openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-open-o faButt" aria-hidden="true">..</i>   
+              <i v-if="openChangeInput" v-on:click="email_contents" class="fa fa-share-alt faButt" aria-hidden="true"></i>   
               <i v-if="openChangeInput" v-on:click="post_key('AUX_INPUT')" class="fa fa-microphone faButt" aria-hidden="true"></i>   
-              <i v-if="openChangeInput" v-on:click="open_random_content" class="fa fa-exclamation faButt" aria-hidden="true"></i>   
-              <i v-if="openChangeInput" v-on:click="email_contents" class="fa fa-share faButt" aria-hidden="true"></i>   
+              <i v-if="openChangeInput" v-on:click="open_random_content" class="fa fa-exclamation faButt" aria-hidden="true"></i>                 
            </div> 
           </h3>                                                                                                     
         </div>   
@@ -324,7 +324,7 @@ export default {
         }
     },
     add_item() {
-        alertify.warning("Add new item. Not implemented yet");
+        alertify.warning("Share item. Not implemented yet");
     },
     get_ip() {
         if (this.BoseSpeakerIP == "") {
@@ -487,7 +487,7 @@ export default {
         return false;
       },
       email_contents() {
-        alertify.warning("email contents not done yet");
+        alertify.warning("share item not done yet");
       },
       open_random_content() {
         var random_location = Math.floor(Math.random() * 100000)+1;
