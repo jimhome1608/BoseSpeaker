@@ -510,6 +510,7 @@ export default {
         this.selected_play.image = ContentItem.image;
         this.selected_play.item = ContentItem.item;
         this.selected_play.name = ContentItem.name;
+        this.now_playing_status = ContentItem.name;
         ContentItem.lastPlayed = moment().unix();
         this.saveToLocalStorage();
         console.log(ContentItem.lastPlayed);
@@ -520,7 +521,7 @@ export default {
           .then(response => {
             instance.boseObject =  response.data; 
             instance.currentPlayingContent = ContentItem;
-            setTimeout(function(){ instance.get_now_playing(true)}, 5000);
+            //setTimeout(function(){ instance.get_now_playing(true)}, 5000);
           })
           .catch(function (response) {
                 instance.now_playing_status = "Failed to connect on "+instance.BoseSpeakerIP+".  Click Cogs to change settings";
