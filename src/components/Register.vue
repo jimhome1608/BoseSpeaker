@@ -18,12 +18,8 @@
             <h4 v-bind:class="get_class()">{{statusline}}</h4>             
              <br />             
              <img src="../assets/Bose03.png" height="320" width="380"/>
-            <div class="author well">               
-            <strong>Author:</strong> <br />
-            Jim Clark<br />
-            <a href="http://www.jimclark.net.au/" target="_blank">www.jimclark.net.au/</a><br />
-            <i class="fa fa-envelope-o" aria-hidden="true"></i>
-            <a href="mailto:jim@jimclark.com.au?Subject=Bose Speaker" target="_top">jim@jimclark.com.au</a><br />
+            <div class="aboutme">               
+            <a href="http://www.jimclark.net.au" target="_blank">www.jimclark.net.au/</a><br />
             </div>             
         </div>        
         
@@ -120,14 +116,21 @@
 </script>
 
 <style  scoped>
-.author {
-    padding-right: 10px;
-    background-color: silver;  
-    font-size: large;  
-    line-height: 1.5;
-}
 a {
-    font-size: x-large
+    background-color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 15px;
+
+}
+.aboutme {
+    
+    margin-top: 20px;
+    color: white;
+    padding-right: 10px;
+    line-height: 2;    
 }
 .searching {
     background-color: darkgreen;
