@@ -437,6 +437,29 @@ export default {
           instance.boseObject =  response.data;  
         });
     },    
+    search_in_list(c) {
+      //return "";
+      //need to remove <itemName> element to allow for name change from original
+      //<ContentItem source="STORED_MUSIC" location="22$99" sourceAccount="0011327a-94ee-0011-ee94-ee947a321100/0" isPresetable="true"><itemName>Toumastin _ Adagh</itemName></ContentItem>
+       console.log("search_in_list");       
+       var parser = new DOMParser();
+       var xmlDoc = parser.parseFromString(c,"text/xml"); 
+       var inSource = xmlDoc.getElementsByTagName("ContentItem")[0].getAttribute("source"); 
+       var inLocation = xmlDoc.getElementsByTagName("ContentItem")[0].getAttribute("location"); 
+       var source = "";
+       var location = "";       
+       for(var i in this.contentItmes){           
+            var xmlDocFromList = parser.parseFromString(this.contentItmes[i].item, "text/xml");                     
+            source = xmlDocFromList.getElementsByTagName("ContentItem")[0].getAttribute("source"); 
+            location = xmlDocFromList.getElementsByTagName("ContentItem")[0].getAttribute("location"); 
+            if (inSource != source) continue;
+            if (inLocation != location) continue;
+            console.log(this.contentItmes[i].name);
+            return this.contentItmes[i].name;
+            break;
+        };
+      return "";
+    },
     get_now_playing(showWarning) {      
             this.now_playing_status = "Connecting";
              // var _url = "http://10.0.0.49:8090/trackInfo";
@@ -465,7 +488,11 @@ export default {
                   instance.now_playing.name =  xmlDoc.getElementsByTagName("itemName") [0].childNodes[0].nodeValue; 
                   if (xmlDoc.getElementsByTagName("containerArt").length)
                      instance.now_playing.image =  xmlDoc.getElementsByTagName("containerArt") [0].childNodes[0].nodeValue; 
-                  instance.now_playing_status = instance.now_playing.name;                                 
+                  var _name = instance.search_in_list(_content);                  
+                  if (_name != "")   
+                    instance.now_playing_status = _name;
+                  else
+                    instance.now_playing_status = instance.now_playing.name;                                 
                 })
                 .catch(function (response) {
                     console.log('get_now_playing');
