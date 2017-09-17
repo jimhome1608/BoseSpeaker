@@ -1,4 +1,5 @@
 <template>
+  <div class="wrapper">
   <div class="container">     
     <div class="row"> 
       <div>
@@ -85,8 +86,8 @@
             <br />
           <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger">Remove </button>
         </div>    
-    </div>
-    
+    </div>    
+  </div>
   </div>
 
 </template>
@@ -564,13 +565,21 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+<<style>
+ body {
+    
+ } 
+</style>
+
 <style scoped>
+.container {
+  margin-left: 10px;
+  color: white;
+}
 .blockButtons {
   display: inline-block;
 }
-.container {
-  margin-left: 10px;
-}
+
 .top_butts {
   font-weight: bold;
   font-size: large;
@@ -604,7 +613,7 @@ h1, h2 {
   float: right; 
 }
 .fa-star {
-  color: skyblue;
+  color:#337ab7;
 }
 .liButton {  
   border: 1px solid black;
@@ -660,13 +669,18 @@ a {
   color: skyblue;
 }
 .view {
-  float: left;
-  background-color: white;
+  float: left;  
   font-weight: lighter;
 }
 .current_selection {
-  background-color: rebeccapurple;
-  color: white;
+  border: 0px solid black;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 15px;
+  padding-right: 15px;
+  border-radius: 15px;
+  color: black;
+  background: white;
 }
 .editname {
   padding-left: 50px;
