@@ -1,3 +1,4 @@
+
 <template>
   <div class="wrapper">
   <div class="container">     
@@ -24,7 +25,7 @@
            </div> 
           </h3>                                                                                                     
         </div>   
-        <div class="view">
+        <div class="view"  align="left">
              <i v-on:click="sortPlayList" class="fa fa-refresh fa-2x faButt" aria-hidden="true"></i>     
              {{sortOrder}}                    
              <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
