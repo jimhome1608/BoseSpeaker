@@ -8,7 +8,6 @@
             <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i>              
           </h3>
       </div>   
-      <hr>   
   
         <div align="left">   
           <h3 align="left">&nbsp;{{now_playing_status}}&nbsp;
@@ -26,7 +25,8 @@
           </h3>                                                                                                     
         </div>   
         <div class="view">
-             <i v-on:click="sortPlayList" class="fa fa-refresh fa-2x faButt" aria-hidden="true"></i>                         
+             <i v-on:click="sortPlayList" class="fa fa-refresh fa-2x faButt" aria-hidden="true"></i>     
+             {{sortOrder}}                    
              <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
              <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>             
              <div class="blockButtons">   
@@ -42,23 +42,18 @@
          </div>                  
          <br /> 
          <br /> 
-         <br /> 
-         <div v-if="sortOrder!=''" align="left">  
-             Sorted: <mark>{{sortOrder}} </mark>
-         </div> 
-         <div  align="left">                      
-           
+         <div class="h4" align="left">                                 
           <input class="viewOptions" v-model="rbViewOptions"  type="radio" name="gender" value="0"> All
-          <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="1"> Internet Radio
-          <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="2"> Local Files
+          <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="1"> Radio
+          <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="2"> Files
         </div>  
         <ul v-if="ViewList" class="nav nav-pills">          
            <li v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
+             <h4  class = "blockButtons" v-on:click="play(c)"> {{c.name}}</h4>
             <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
-            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt" aria-hidden="true"></i>
-            <h4  v-on:click="play(c)"> {{c.name}}</h4>
+            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i>            
            </li>
-        </ul>     
+        </ul> 
         <ul v-if="ViewList" class="nav nav-pills">          
            <li v-if="notCurrentlyPlayAndNotFiltered(c)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
             <h4  v-on:click="play(c)"> {{c.name}}</h4>
@@ -579,7 +574,9 @@ export default {
 .blockButtons {
   display: inline-block;
 }
-
+.displayInitial {
+  display: initial
+}
 .top_butts {
   font-weight: bold;
   font-size: large;
@@ -670,17 +667,17 @@ a {
 }
 .view {
   float: left;  
-  font-weight: lighter;
+  font-weight: lighter;  
 }
 .current_selection {
-  border: 0px solid black;
+  border: 1px solid grey;
   padding-top: 5px;
   padding-bottom: 5px;
   padding-left: 15px;
   padding-right: 15px;
   border-radius: 15px;
-  color: black;
-  background: white;
+  color: white;
+  background: transparent;
 }
 .editname {
   padding-left: 50px;

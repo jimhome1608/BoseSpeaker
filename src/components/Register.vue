@@ -17,11 +17,12 @@
             </div><!-- /input-group -->
             <h4 v-bind:class="get_class()">{{statusline}}</h4>             
              <br />             
-             <img src="../assets/Bose03.png" height="320" width="380"/>
+             <img src="../assets/Bose04.gif" height="320" width="380"/>
             <div class="aboutme">               
             <a href="http://www.jimclark.net.au" target="_blank">www.jimclark.net.au/</a><br />
             </div>             
-        </div>        
+        </div> 
+     
         
     </div>
 </template>
