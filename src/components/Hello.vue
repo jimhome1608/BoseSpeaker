@@ -39,23 +39,24 @@
                 <i v-on:click="bass_up_down(-1)" class="fa fa-sort-desc fa-2x faButt" aria-hidden="true"></i>             
                 {{get_bass()}}
                 <i v-on:click="bass_up_down(1)" class="fa fa-sort-asc fa-2x faButt" aria-hidden="true"></i>              
-             </div>
+             </div>              
          </div>                  
-         <br /> 
-         <br /> 
-         <div class="h4" align="left">                                 
-          <input class="viewOptions" v-model="rbViewOptions"  type="radio" name="gender" value="0"> All
-          <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="1"> Radio
-          <input class="viewOptions" v-model="rbViewOptions" type="radio" name="gender" value="2"> Files
-        </div>  
-        <ul v-if="ViewList" class="nav nav-pills">          
-           <li v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
+        <br />
+        <br />
+        <br />
+        <div v-if="ViewList" class="displaytable"  align="left">          
+           <div v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
              <h4  class = "blockButtons" v-on:click="play(c)"> {{c.name}}</h4>
             <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
-            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i>            
-           </li>
-        </ul> 
-        <ul v-if="ViewList" class="nav nav-pills">          
+            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i>                         
+           </div>           
+        </div>
+        <br />
+        <div class="current_selection filterdiv" align="left" v-on:click="onFilterClick" > 
+                <i class="fa fa-search-plus" aria-hidden="true"></i>
+                {{filterCaption}}                                
+              </div> 
+        <ul v-if="ViewList" class="nav nav-pills">                    
            <li v-if="notCurrentlyPlayAndNotFiltered(c)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
             <h4  v-on:click="play(c)"> {{c.name}}</h4>
            </li>
@@ -98,7 +99,8 @@ export default {
     return {
       sortOrder: "",
       edtName: "",      
-      rbViewOptions: 0,
+      filterMode: 0,
+      filterCaption: "All",
       currentPlayingContent: {},
       currentlyPausible: false,
       openChangeInput: false,
@@ -178,6 +180,27 @@ export default {
     saveToLocalStorage() {
         localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes)); 
     }, 
+    onFilterClick() {
+      
+      switch (this.filterMode) {
+          case 0:
+              this.filterMode = 1;
+              this.filterCaption = "Internet Radio";
+              break;
+          case 1:
+              this.filterMode = 2;
+              this.filterCaption = "Local Files";
+              break;
+          case 2:
+              this.filterMode = 0;
+              this.filterCaption = "All";
+              break;
+          default:
+              this.filterMode = 0;
+              this.filterCaption = "All";
+              break;
+      } 
+    },
     sortPlayList() {
       function compareAscName(a,b) {
         if (a.name < b.name)
@@ -223,13 +246,13 @@ export default {
         }
     },
     isNotFiltered(c) {
-      if (this.rbViewOptions == 0)
+      if (this.filterMode == 0)
         return true;
-      if (this.rbViewOptions == 1)   {
+      if (this.filterMode == 1)   {
         if (c.item.indexOf("INTERNET_RADIO") > 0)
           return true;
       }
-       if (this.rbViewOptions == 2)   {
+       if (this.filterMode == 2)   {
         if (c.item.indexOf("STORED_MUSIC") > 0)
           return true;
       }
@@ -575,8 +598,8 @@ export default {
 .blockButtons {
   display: inline-block;
 }
-.displayInitial {
-  display: initial
+.displaytable {
+  display: table;
 }
 .top_butts {
   font-weight: bold;
@@ -598,7 +621,7 @@ h1, h2 {
   margin-right: 5px;
   margin-bottom: 5px;
 }
-.fa {
+.fa, not(.fa-search) {
    cursor: pointer;   
    width: 50px;
 }
@@ -671,6 +694,7 @@ a {
   font-weight: lighter;  
 }
 .current_selection {
+  float: right; 
   border: 1px solid grey;
   padding-top: 5px;
   padding-bottom: 5px;
@@ -679,9 +703,16 @@ a {
   border-radius: 15px;
   color: white;
   background: transparent;
+  margin-right: 50px;
 }
 .editname {
   padding-left: 50px;
   padding-right: 50px;
+}
+.filterdiv {
+  width: 100px;
+  height: 52px;
+  cursor: pointer;
+  margin-left: 10px;
 }
 </style>
