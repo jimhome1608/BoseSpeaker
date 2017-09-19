@@ -44,11 +44,15 @@
         <br />
         <br />
         <br />
+        
         <div v-if="ViewList" class="displaytable"  align="left">          
            <div v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
              <h4  class = "blockButtons" v-on:click="play(c)"> {{c.name}}</h4>
             <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
-            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i>                         
+            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i> 
+            <div v-if="now_playing_track!=''">
+              {{now_playing_track}}
+             </div>                        
            </div>           
         </div>
         <br />
@@ -157,6 +161,7 @@ export default {
       bassObject: '',
       bass: 10,      
       now_playing_status: '',
+      now_playing_track: '',
     }
   },  
   created: function () {
@@ -424,8 +429,6 @@ export default {
             _body =  '<key state="release" sender="Gabbo">'+_key+'</key>';
             axios.post(_url, _body).then(response => {
               console.log(response.data);
-              if (_key == 'POWER')
-                instance.get_now_playing(false);
             })
         });
     },
@@ -480,11 +483,22 @@ export default {
         };
       return "";
     },
-    get_now_playing(showWarning) {      
-            this.now_playing_status = "Connecting";
+    /*
+    lots more info returned in now_play such as current track
+    This XML file does not appear to have any style information associated with it. The document tree is shown below.
+      <nowPlaying deviceID="9884E39A8AB2" source="STORED_MUSIC" sourceAccount="0011327a-94ee-0011-ee94-ee947a321100/0">
+       <ContentItem source="STORED_MUSIC" location="22$110" sourceAccount="0011327a-94ee-0011-ee94-ee947a321100/0" isPresetable="true">
+       <itemName>Grieg_ Peer Gynt, From Holberg's Time</itemName></ContentItem><track>Grieg: Peer Gynt, Op. 23 - Solveig's Song</track>
+       <artist>Elly Ameling; Edo De Waart: San Francisco Symphony Orchestra & Chorus</artist>
+       <album>Grieg: Peer Gynt, From Holberg's Time</album><offsetoffset>8</offsetoffset>
+       <art artImageStatus="SHOW_DEFAULT_IMAGE"/><time total="326">98</time><skipEnabled/><playStatus>PLAY_STATE</playStatus><shuffleSetting>SHUFFLE_OFF</shuffleSetting><repeatSetting>REPEAT_OFF</repeatSetting><skipPreviousEnabled/></nowPlaying>
+     */  
+    get_now_playing(showWarning) {                                   
+            //this.now_playing_status = "Connecting";
              // var _url = "http://10.0.0.49:8090/trackInfo";
             var instance = this;
             var _url =  instance.get_ip()+":8090/now_playing"; 
+            var _hasTrackInfo = true;
             console.log(_url);
               axios.get(_url)
                .then(response => {
@@ -502,17 +516,38 @@ export default {
                   _content = instance.boseObject.substring(startpos, endpos); 
                   //_content = _content.replace(/\"/g,'\\"');
                   instance.now_playing.item = _content;
-                  console.log(instance.now_playing.item);
+                  //console.log(instance.now_playing.item);
                   var parser = new DOMParser();
                   var xmlDoc = parser.parseFromString(instance.boseObject,"text/xml");                  
                   instance.now_playing.name =  xmlDoc.getElementsByTagName("itemName") [0].childNodes[0].nodeValue; 
+                  if (_content.indexOf("STORED_MUSIC") < 0)
+                    _hasTrackInfo = false;
+                  if (_hasTrackInfo) {
+                      var _offset = "";
+                      var _track = xmlDoc.getElementsByTagName("track")[0].childNodes[0].nodeValue; 
+                      _offset = xmlDoc.getElementsByTagName("offset")[0].childNodes[0].nodeValue; 
+                      //instance.now_playing.track = 
+                      startpos = _track.indexOf(",");
+                     // console.log("length");
+                     // console.log(xmlDoc.getElementsByTagName("track").NodeList.getLength());
+                      if (startpos > 0)
+                        _track = _track.substring(startpos+1, 255); 
+                      _track = _track.trim(); 
+                      if (_track != '')
+                        _track = _offset+") "+_track;
+                      instance.now_playing_track =  _track; 
+                                          
+                  }      
+                  else 
+                    instance.now_playing_track = "";            
                   if (xmlDoc.getElementsByTagName("containerArt").length)
                      instance.now_playing.image =  xmlDoc.getElementsByTagName("containerArt") [0].childNodes[0].nodeValue; 
                   var _name = instance.search_in_list(_content);                  
                   if (_name != "")   
                     instance.now_playing_status = _name;
                   else
-                    instance.now_playing_status = instance.now_playing.name;                                 
+                    instance.now_playing_status = instance.now_playing.name;  
+                  setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                  
                 })
                 .catch(function (response) {
                     console.log('get_now_playing');
