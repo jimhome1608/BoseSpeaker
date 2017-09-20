@@ -14,8 +14,6 @@
           <h3 align="left">&nbsp;{{now_playing_status}}&nbsp;
           <i  v-on:click="get_now_playing(true)" class="fa fa-music faButt" aria-hidden="true"></i>          
           <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star faButt" aria-hidden="true"></i>
-          <i v-if="!ViewList" v-on:click="setViewList(true)" class="fa fa-bars faButt" aria-hidden="true"></i>
-          <i v-if="ViewList" v-on:click="setViewList(false)" class="fa fa-id-card-o faButt" aria-hidden="true"></i>
           <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>     
            <div class="blockButtons">                                             
               <i v-if="openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-open-o faButt" aria-hidden="true">..</i>   
@@ -45,7 +43,7 @@
         <br />
         <br />
         
-        <div v-if="ViewList" class="displaytable"  align="left">          
+        <div class="displaytable"  align="left">          
            <div v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
              <h4  class = "blockButtons" v-on:click="play(c)"> {{c.name}}</h4>
             <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
@@ -60,21 +58,14 @@
                 <i class="fa fa-search-plus" aria-hidden="true"></i>
                 {{filterCaption}}                                
               </div> 
-        <ul v-if="ViewList" class="nav nav-pills">                    
+        <ul class="nav nav-pills">                    
            <li v-if="notCurrentlyPlayAndNotFiltered(c)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
             <h4  v-on:click="play(c)"> {{c.name}}</h4>
            </li>
         </ul>         
-        <ul v-if="!ViewList" class="nav nav-pills">          
-           <li role="presentation"class="liItem"  v-for="c in contentItmes" v-on:click="play(c)" >
-            <div style="color:white;white-space: nowrap;"> {{c.name}}</div>
-             <img v-bind:src=c.image height="170" width="170">
-           </li>
-        </ul>           
         <br />   
         <div v-if="selected_play.item!=''">          
           <hr style="height:1px;border:none;color:#333;background-color:#333;" />         
-          <img v-if="selected_play.image!=''" v-bind:src="selected_play.image"  height="90" width="90">          
            <br /> 
            <div class="input-group editname">             
               <span class="input-group-btn">
@@ -104,22 +95,19 @@ export default {
       sortOrder: "",
       edtName: "",      
       filterMode: 0,
-      filterCaption: "All",
+      filterCaption: "All Sources",
       currentPlayingContent: {},
       currentlyPausible: false,
       openChangeInput: false,
       BoseSpeakerIP: "10.0.0.49",
-      ViewList: true,
       about_show: false,
       selected_play: {
         item: "",
         name: "",
-        image: "",                
       },
       now_playing: {
         item: "",
         name: "",
-        image: "",                
       },
       ContentItem: '',
       contentItmesStore: "",
@@ -127,33 +115,11 @@ export default {
         {                                  
 	    	item: "<ContentItem source=\"INTERNET_RADIO\" location=\"77625\" sourceAccount=\"\" isPresetable=\"true\"><itemName>JAZZfm 106.5</itemName><containerArt>http://item.radio456.com/007452/logo/logo-77625.jpg</containerArt></ContentItem>",
 		    name: "JAZZfm 106.5",
-        image: "http://item.radio456.com/007452/logo/logo-77625.jpg"
 	      },
         {
 	    	item: "<ContentItem source=\"INTERNET_RADIO\" location=\"64030\" sourceAccount=\"\" isPresetable=\"true\"><itemName>ABC Classic 2</itemName><containerArt>http://item.radio456.com/007452/logo/logo-64030.jpg</containerArt></ContentItem>",
 		    name: "ABC Classic",
-        image: "http://item.radio456.com/007452/logo/logo-64030.jpg"
-	      },
-        {
-        item: "<ContentItem source=\"INTERNET_RADIO\" location=\"49358\" sourceAccount=\"\" isPresetable=\"true\"><itemName>Ambiance Reggae</itemName><containerArt>http://item.radio456.com/007452/logo/logo-49358.jpg</containerArt></ContentItem>",
-        name: "Ambiance Reggae",
-        image: "http://item.radio456.com/007452/logo/logo-49358.jpg"
-        },
-        {
-        item: "<ContentItem source=\"INTERNET_RADIO\" location=\"6701\" sourceAccount=\"\" isPresetable=\"true\"><itemName>3MBS 103.5 FM</itemName><containerArt>http://item.radio456.com/007452/logo/logo-6701.jpg</containerArt></ContentItem>",
-        name: "3MBS 103.5 FM",
-        image: "http://item.radio456.com/007452/logo/logo-6701.jpg"
-        },
-        {
-        item: "<ContentItem source=\"INTERNET_RADIO\" location=\"33453\" sourceAccount=\"\" isPresetable=\"true\"><itemName>Radio Eigekai</itemName><containerArt>http://item.radio456.com/007452/logo/logo-33453.jpg</containerArt></ContentItem>",
-        name: "Radio Eigekai",
-        image: "http://item.radio456.com/007452/logo/logo-33453.jpg"
-        },
-        {
-        item: "<ContentItem source=\"INTERNET_RADIO\" location=\"80921\" sourceAccount=\"\" isPresetable=\"true\"><itemName>Boost Tapes</itemName><containerArt>http://item.radio456.com/007452/logo/logo-80921.jpg</containerArt></ContentItem>",
-        name: "Boost Tapes",
-        image: "http://item.radio456.com/007452/logo/logo-80921.jpg"
-        }
+	      }
       ],
       boseObject: '' ,
       volumeObject: '',
@@ -177,6 +143,7 @@ export default {
       else {
         this.saveToLocalStorage();
       };
+      this.merge_in_presets();
       this.get_now_playing(false);
   },
   computed: {
@@ -198,11 +165,11 @@ export default {
               break;
           case 2:
               this.filterMode = 0;
-              this.filterCaption = "All";
+              this.filterCaption = "All Sources";
               break;
           default:
               this.filterMode = 0;
-              this.filterCaption = "All";
+              this.filterCaption = "All Sources";
               break;
       } 
     },
@@ -239,17 +206,6 @@ export default {
       this.saveToLocalStorage();
 
     },
-    goodbye() {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
-    },
     isNotFiltered(c) {
       if (this.filterMode == 0)
         return true;
@@ -258,7 +214,7 @@ export default {
           return true;
       }
        if (this.filterMode == 2)   {
-        if (c.item.indexOf("STORED_MUSIC") > 0)
+        if ((c.item.indexOf("STORED_MUSIC") > 0) || (c.item.indexOf("LOCAL_MUSIC") > 0))
           return true;
       }
       return false;
@@ -285,41 +241,85 @@ export default {
           return true;
         return false;
     },
-    setViewList(state) {
-      this.ViewList = state;
-    },
-    check_inlist(ContentItem){
-      for(var i in this.contentItmes){
-            if (this.contentItmes[i].name != ContentItem.name)
-              continue;
-            if (this.contentItmes[i].image != ContentItem.image)
-              continue; 
-            return true;            
+    check_inlist_source_location(c) {
+      //return "";
+      //need to remove <itemName> element to allow for name change from original
+      //<ContentItem source="STORED_MUSIC" location="22$99" sourceAccount="0011327a-94ee-0011-ee94-ee947a321100/0" isPresetable="true"><itemName>Toumastin _ Adagh</itemName></ContentItem>
+
+       console.log("check_inlist_source_location");       
+      // console.log(c.item);       
+       var parser = new DOMParser();
+       var xmlDoc = parser.parseFromString(c.item,"text/xml"); 
+       var inSource = xmlDoc.getElementsByTagName("ContentItem")[0].getAttribute("source"); 
+       var inLocation = xmlDoc.getElementsByTagName("ContentItem")[0].getAttribute("location"); 
+       var source = "";
+       var location = "";   
+       var _name = "";    
+       for(var i in this.contentItmes){           
+            var xmlDocFromList = parser.parseFromString(this.contentItmes[i].item, "text/xml");                     
+            source = xmlDocFromList.getElementsByTagName("ContentItem")[0].getAttribute("source"); 
+            location = xmlDocFromList.getElementsByTagName("ContentItem")[0].getAttribute("location"); 
+            _name =   this.contentItmes[i].name; 
+            if (inSource != source) continue;
+            if (inLocation != location) continue;            
+            return {found:true,name:_name};
             break;
         };
-        return false;
+      return {found:false,name:''};
     },
     add_content(ContentItem) {
-      if (this.check_inlist(ContentItem)) {
+      if (this.check_inlist_source_location(ContentItem).found) {
         alertify.warning(ContentItem.name+" is already in your list");
         return;
       };
-      var newConent = {item:"",name:"",image:""};
+      var newConent = {item:"",name:""};
       newConent.item = ContentItem.item;
       newConent.name = ContentItem.name;
-      newConent.image = ContentItem.image;
       this.contentItmes.push(newConent);
       this.saveToLocalStorage();
 
     }, 
+    merge_in_presets() {
+      var instance = this;
+      var _url =  instance.get_ip()+":8090/presets"; 
+       axios.get(_url)
+        .then(response => {
+          var parser = new DOMParser();
+          var xmlDoc = parser.parseFromString(response.data, "text/xml");  
+          var _source = "";
+          var _location = "";
+          var _sourceAccount = "";
+          var _name = "";
+          var _makeContent = "";
+          var _content = {item:"",name:""};
+          var x = xmlDoc.getElementsByTagName("presets")[0].childNodes;
+          //console.log(x.length) ;
+          //console.log("merge_in_presets") ;
+          for (var i = 0; i < x.length ;i++) {
+               _source = x[i].getElementsByTagName("ContentItem")[0].getAttribute("source");
+               _location = x[i].getElementsByTagName("ContentItem")[0].getAttribute("location");
+               _sourceAccount = x[i].getElementsByTagName("ContentItem")[0].getAttribute("sourceAccount");//"0011327a-94ee-0011-ee94-ee947a321100/0"
+               _name = x[i].getElementsByTagName("itemName")[0].childNodes[0].nodeValue; 
+               _makeContent = 
+                  '<ContentItem source="'+_source+'" location="'+_location+'" sourceAccount="'+_sourceAccount+'"><itemName>'+_name+'</itemName><containerArt/></ContentItem>';
+               _content.item = _makeContent;
+               _content.name = _name;
+               //console.log("presets");  
+               //console.log(_makeContent);
+               var s = this.check_inlist_source_location(_content);
+              // console.log(s);
+               if (s.found)
+                  continue;
+               this.add_content(_content);                  
+          }
+        });           
+    },
     saveEditName(ContentItem, edtName) {
       console.log('saveEditName start ' +edtName);
       for(var i in this.contentItmes){            
             if (this.contentItmes[i].name != ContentItem.name)
               continue;
             console.log(this.contentItmes[i].name);  
-            if (this.contentItmes[i].image != ContentItem.image)
-              continue; 
             console.log('saveEditName');
             this.contentItmes[i].name =  this.edtName;  
             this.saveToLocalStorage();
@@ -335,8 +335,6 @@ export default {
         for(var i in this.contentItmes){
             if (this.contentItmes[i].name != ContentItem.name)
               continue;
-            if (this.contentItmes[i].image != ContentItem.image)
-              continue; 
             if (this.contentItmes[i].item != ContentItem.item)
               continue;   
             this.contentItmes.splice(i, 1);
@@ -347,9 +345,6 @@ export default {
             this.play(this.contentItmes[i]);
             break;
         }
-    },
-    add_item() {
-        alertify.warning("Share item. Not implemented yet");
     },
     get_ip() {
         if (this.BoseSpeakerIP == "") {
@@ -459,31 +454,11 @@ export default {
         .then(response => {
           instance.boseObject =  response.data;  
         });
-    },    
-    search_in_list(c) {
-      //return "";
-      //need to remove <itemName> element to allow for name change from original
-      //<ContentItem source="STORED_MUSIC" location="22$99" sourceAccount="0011327a-94ee-0011-ee94-ee947a321100/0" isPresetable="true"><itemName>Toumastin _ Adagh</itemName></ContentItem>
-       console.log("search_in_list");       
-       var parser = new DOMParser();
-       var xmlDoc = parser.parseFromString(c,"text/xml"); 
-       var inSource = xmlDoc.getElementsByTagName("ContentItem")[0].getAttribute("source"); 
-       var inLocation = xmlDoc.getElementsByTagName("ContentItem")[0].getAttribute("location"); 
-       var source = "";
-       var location = "";       
-       for(var i in this.contentItmes){           
-            var xmlDocFromList = parser.parseFromString(this.contentItmes[i].item, "text/xml");                     
-            source = xmlDocFromList.getElementsByTagName("ContentItem")[0].getAttribute("source"); 
-            location = xmlDocFromList.getElementsByTagName("ContentItem")[0].getAttribute("location"); 
-            if (inSource != source) continue;
-            if (inLocation != location) continue;
-            console.log(this.contentItmes[i].name);
-            return this.contentItmes[i].name;
-            break;
-        };
-      return "";
-    },
+    },        
     /*
+
+    http://10.0.0.49:8090/presets
+
     lots more info returned in now_play such as current track
     This XML file does not appear to have any style information associated with it. The document tree is shown below.
       <nowPlaying deviceID="9884E39A8AB2" source="STORED_MUSIC" sourceAccount="0011327a-94ee-0011-ee94-ee947a321100/0">
@@ -540,13 +515,14 @@ export default {
                   }      
                   else 
                     instance.now_playing_track = "";            
-                  if (xmlDoc.getElementsByTagName("containerArt").length)
-                     instance.now_playing.image =  xmlDoc.getElementsByTagName("containerArt") [0].childNodes[0].nodeValue; 
-                  var _name = instance.search_in_list(_content);                  
+                  var _inlist = this.check_inlist_source_location(instance.now_playing)   ;
+ 
+                  var _name =_inlist.name;                  
                   if (_name != "")   
                     instance.now_playing_status = _name;
                   else
                     instance.now_playing_status = instance.now_playing.name;  
+                 // this.merge_in_presets();
                   setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                  
                 })
                 .catch(function (response) {
@@ -578,19 +554,18 @@ export default {
          {                                  
 	    	item: "<ContentItem source=\"INTERNET_RADIO\" location=\""+random_location+"\" sourceAccount=\"\" isPresetable=\"true\"><itemName>JAZZfm 106.5</itemName><containerArt>http://item.radio456.com/007452/logo/logo-77625.jpg</containerArt></ContentItem>",
 		    name: "Random -> "+random_location,
-        image: ""
 	      };
         this.play(random_content);
 
       },
       play(ContentItem) {
+
         this.currentlyPausible = false;
         if (this.isPausable(ContentItem))
           this.currentlyPausible = true;
         alertify.message("Opening ["+ContentItem.name+"]");
         this.edtName = ContentItem.name;
         this.now_playing_info = "Changing Station";
-        this.selected_play.image = ContentItem.image;
         this.selected_play.item = ContentItem.item;
         this.selected_play.name = ContentItem.name;
         this.now_playing_status = ContentItem.name;
@@ -603,12 +578,12 @@ export default {
           axios.post(_url, _body)
           .then(response => {
             instance.boseObject =  response.data; 
-            instance.currentPlayingContent = ContentItem;
-            //setTimeout(function(){ instance.get_now_playing(true)}, 5000);
+            instance.currentPlayingContent = ContentItem;            
           })
           .catch(function (response) {
-                instance.now_playing_status = "Failed to connect on "+instance.BoseSpeakerIP+".  Click Cogs to change settings";
-                alertify.warning("Failed to connect on "+instance.BoseSpeakerIP+"<br />Click Cogs to change settings");
+              console.log(response);  
+              instance.now_playing_status = "Failed to connect on "+instance.BoseSpeakerIP+".  Click Cogs to change settings";
+              alertify.warning("Failed to connect on "+instance.BoseSpeakerIP+"<br />Click Cogs to change settings");
             });
 
       },      
@@ -619,11 +594,6 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<<style>
- body {
-    
- } 
-</style>
 
 <style scoped>
 .container {
