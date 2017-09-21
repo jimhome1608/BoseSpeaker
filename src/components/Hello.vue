@@ -4,7 +4,8 @@
   <div class="container">     
     <div class="row"> 
       <div>
-          <h3 align="left">&nbsp;Bose Speaker 
+          <h3 align="left">Bose Speaker
+             <i class="fa fa-info" aria-hidden="true" v-on:click="open_video"></i>            
             <i v-on:click="post_key('POWER')" class="fa fa-power-off" aria-hidden="true"></i>         
             <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i>              
           </h3>
@@ -55,7 +56,6 @@
         </div>
         <br />
         <div class="current_selection filterdiv" align="left" v-on:click="onFilterClick" > 
-                <i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;
                 {{filterCaption}}
               </div> 
         <ul v-if="filterMode!=3" class="nav nav-pills">  
@@ -161,6 +161,13 @@ export default {
   computed: {
   },
   methods: {
+    open_video() {
+        alertify.confirm("This video will take a moment or 2 to load so you will need to be patient...", 
+          function(){
+            var win = window.open('http://bosespeaker.jimclark.net.au/video/bosespeaker.mp4', '_blank');
+            win.focus();
+           });
+    },
     saveToLocalStorage() {
         localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes)); 
     }, 
@@ -649,14 +656,14 @@ h1, h2 {
   margin-right: 5px;
   margin-bottom: 5px;
 }
-.fa, not(.fa-search) {
+.fa {
    cursor: pointer;   
    width: 50px;
 }
-.fa-power-off, .fa-cogs {
+.fa-power-off, .fa-cogs, .fa-info {
   float: right;  
-  margin-right: 20px;
-  width: 80px;
+  margin-right: 10px;
+  width: 50px;
 }
 .fa-times, .fa-pencil-square-o  {
   float: right; 
@@ -739,7 +746,7 @@ a {
   width: 120px;
   height: 52px;
   cursor: pointer;
-  margin-left: 10px;  
+  margin-left: 10px; 
 }
 .editPresets {
   background-color: transparent;
