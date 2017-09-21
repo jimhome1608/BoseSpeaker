@@ -55,19 +55,24 @@
         </div>
         <br />
         <div class="current_selection filterdiv" align="left" v-on:click="onFilterClick" > 
-                <i class="fa fa-search-plus" aria-hidden="true"></i>
-                {{filterCaption}}                                
+                <i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;
+                {{filterCaption}}
               </div> 
-        <ul class="nav nav-pills">                    
+        <ul v-if="filterMode!=3" class="nav nav-pills">  
            <li v-if="notCurrentlyPlayAndNotFiltered(c)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
             <h4  v-on:click="play(c)"> {{c.name}}</h4>
            </li>
         </ul>         
+        <ul v-if="filterMode==3 " class="nav nav-pills"> 
+           <li  role="presentation"class="liItem2"  v-for="p in presetItems"  >
+            <h4  v-on:click="play(p)"> {{p.name}}</h4>
+           </li>
+        </ul>     
         <br />   
         <div v-if="selected_play.item!=''">          
           <hr style="height:1px;border:none;color:#333;background-color:#333;" />         
-           <br /> 
-           <div class="input-group editname">             
+           <div v-if="filterMode!=3"> 
+           <div  class="input-group editname">             
               <span class="input-group-btn">
                 <button class="btn btn-primary" type="button" v-on:click="saveEditName(selected_play, edtName)" >
                   Save
@@ -75,8 +80,14 @@
               </span>
               <input type="text" class="form-control" placeholder="" v-model="edtName">
             </div><!-- /input-group -->
-            <br />
-          <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger">Remove </button>
+            <br />          
+            <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger">Remove </button>
+            </div>   
+             <div class="editPresets h4" v-if="filterMode==3" align="left"> 
+               Edit and Remove functions not available for your current view of <mark><strong>Device Presets</strong></mark>.  <br />
+               These items are set on the BOSE Device itself<br />
+               Ability to add/remove presets on device from this app are planned for future updates
+            </div>             
         </div>    
     </div>    
   </div>
@@ -111,6 +122,7 @@ export default {
       },
       ContentItem: '',
       contentItmesStore: "",
+      presetItems: [],
       contentItmes: [
         {                                  
 	    	item: "<ContentItem source=\"INTERNET_RADIO\" location=\"77625\" sourceAccount=\"\" isPresetable=\"true\"><itemName>JAZZfm 106.5</itemName><containerArt>http://item.radio456.com/007452/logo/logo-77625.jpg</containerArt></ContentItem>",
@@ -143,7 +155,7 @@ export default {
       else {
         this.saveToLocalStorage();
       };
-      this.merge_in_presets();
+      this.get_presets();
       this.get_now_playing(false);
   },
   computed: {
@@ -157,13 +169,17 @@ export default {
       switch (this.filterMode) {
           case 0:
               this.filterMode = 1;
-              this.filterCaption = "Internet Radio";
+              this.filterCaption = "Local Library";
               break;
           case 1:
               this.filterMode = 2;
-              this.filterCaption = "Local Files";
+              this.filterCaption = "Internet Radio";
               break;
           case 2:
+              this.filterMode = 3;
+              this.filterCaption = "Device Presets";
+              break;
+          case 3:
               this.filterMode = 0;
               this.filterCaption = "All Sources";
               break;
@@ -209,12 +225,16 @@ export default {
     isNotFiltered(c) {
       if (this.filterMode == 0)
         return true;
-      if (this.filterMode == 1)   {
+      if (this.filterMode == 2)   {
         if (c.item.indexOf("INTERNET_RADIO") > 0)
           return true;
       }
-       if (this.filterMode == 2)   {
+      if (this.filterMode == 1)   {
         if ((c.item.indexOf("STORED_MUSIC") > 0) || (c.item.indexOf("LOCAL_MUSIC") > 0))
+          return true;
+      }
+      if (this.filterMode == 3)   {
+        if  (typeof c.item.preset != "undefined") 
           return true;
       }
       return false;
@@ -279,7 +299,7 @@ export default {
       this.saveToLocalStorage();
 
     }, 
-    merge_in_presets() {
+    get_presets() {
       var instance = this;
       var _url =  instance.get_ip()+":8090/presets"; 
        axios.get(_url)
@@ -290,12 +310,12 @@ export default {
           var _location = "";
           var _sourceAccount = "";
           var _name = "";
-          var _makeContent = "";
-          var _content = {item:"",name:""};
+          var _makeContent = "";          
           var x = xmlDoc.getElementsByTagName("presets")[0].childNodes;
           //console.log(x.length) ;
           //console.log("merge_in_presets") ;
           for (var i = 0; i < x.length ;i++) {
+               var _content = {item:"",name:""};
                _source = x[i].getElementsByTagName("ContentItem")[0].getAttribute("source");
                _location = x[i].getElementsByTagName("ContentItem")[0].getAttribute("location");
                _sourceAccount = x[i].getElementsByTagName("ContentItem")[0].getAttribute("sourceAccount");//"0011327a-94ee-0011-ee94-ee947a321100/0"
@@ -304,13 +324,15 @@ export default {
                   '<ContentItem source="'+_source+'" location="'+_location+'" sourceAccount="'+_sourceAccount+'"><itemName>'+_name+'</itemName><containerArt/></ContentItem>';
                _content.item = _makeContent;
                _content.name = _name;
-               //console.log("presets");  
-               //console.log(_makeContent);
-               var s = this.check_inlist_source_location(_content);
+               _content.preset = true;
+               this.presetItems.push(_content)
+               //console.log("presets push");  
+               //console.log(_content.name);
+               //var s = this.check_inlist_source_location(_content);
               // console.log(s);
-               if (s.found)
-                  continue;
-               this.add_content(_content);                  
+              // if (s.found)
+              //    continue;
+              // this.add_content(_content);                  
           }
         });           
     },
@@ -516,14 +538,15 @@ export default {
                   else 
                     instance.now_playing_track = "";            
                   var _inlist = this.check_inlist_source_location(instance.now_playing)   ;
- 
+                  console.log("_inlist");
+                  console.log(_inlist);
                   var _name =_inlist.name;                  
                   if (_name != "")   
                     instance.now_playing_status = _name;
                   else
                     instance.now_playing_status = instance.now_playing.name;  
                  // this.merge_in_presets();
-                  setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                  
+                   setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                  
                 })
                 .catch(function (response) {
                     console.log('get_now_playing');
@@ -559,7 +582,7 @@ export default {
 
       },
       play(ContentItem) {
-
+        //console.log(ContentItem.item);
         this.currentlyPausible = false;
         if (this.isPausable(ContentItem))
           this.currentlyPausible = true;
@@ -706,8 +729,6 @@ a {
   padding-left: 15px;
   padding-right: 15px;
   border-radius: 15px;
-  color: white;
-  background: transparent;
   margin-right: 50px;
 }
 .editname {
@@ -715,9 +736,15 @@ a {
   padding-right: 50px;
 }
 .filterdiv {
-  width: 100px;
+  width: 120px;
   height: 52px;
   cursor: pointer;
-  margin-left: 10px;
+  margin-left: 10px;  
+}
+.editPresets {
+  background-color: transparent;
+  color: white;
+  border-radius: 25px;
+  line-height: 1.5;
 }
 </style>
