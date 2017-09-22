@@ -280,16 +280,18 @@ export default {
        var inSource = xmlDoc.getElementsByTagName("ContentItem")[0].getAttribute("source"); 
        var inLocation = xmlDoc.getElementsByTagName("ContentItem")[0].getAttribute("location"); 
        var source = "";
-       var location = "";   
+       var location = "";  
+       var _item = ""; 
        var _name = "";    
        for(var i in this.contentItmes){           
-            var xmlDocFromList = parser.parseFromString(this.contentItmes[i].item, "text/xml");                     
+            var xmlDocFromList = parser.parseFromString(this.contentItmes[i].item, "text/xml");  
+            _item = this.contentItmes[i].item;                     
             source = xmlDocFromList.getElementsByTagName("ContentItem")[0].getAttribute("source"); 
             location = xmlDocFromList.getElementsByTagName("ContentItem")[0].getAttribute("location"); 
             _name =   this.contentItmes[i].name; 
             if (inSource != source) continue;
             if (inLocation != location) continue;            
-            return {found:true,name:_name};
+            return {found:true,name:_name,item:_item};
             break;
         };
       return {found:false,name:''};
@@ -441,7 +443,16 @@ export default {
 
     },
      post_key(_key) {
-       alertify.warning(_key);
+
+       function capitalize_Words(str)
+       {
+           return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+       }
+
+       var _msg = _key.replace("_", " ");
+       _msg = _msg.toLowerCase();
+       _msg = capitalize_Words(_msg);
+       alertify.warning(_msg);
        var instance = this;
        var _url = this.get_ip()+":8090/key";
        var _body =  '<key state="press" sender="Gabbo">'+_key+'</key>';
@@ -453,6 +464,7 @@ export default {
             _body =  '<key state="release" sender="Gabbo">'+_key+'</key>';
             axios.post(_url, _body).then(response => {
               console.log(response.data);
+              setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                  
             })
         });
     },
@@ -547,13 +559,14 @@ export default {
                   var _inlist = this.check_inlist_source_location(instance.now_playing)   ;
                   console.log("_inlist");
                   console.log(_inlist);
-                  var _name =_inlist.name;                  
-                  if (_name != "")   
-                    instance.now_playing_status = _name;
+                  if (_inlist.found)   
+                    if ( this.selected_play.item != _inlist.item) {
+                       instance.play(_inlist);
+                       return;
+                    }
                   else
                     instance.now_playing_status = instance.now_playing.name;  
-                 // this.merge_in_presets();
-                   setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                  
+                  setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                  
                 })
                 .catch(function (response) {
                     console.log('get_now_playing');
@@ -608,7 +621,8 @@ export default {
           axios.post(_url, _body)
           .then(response => {
             instance.boseObject =  response.data; 
-            instance.currentPlayingContent = ContentItem;            
+            instance.currentPlayingContent = ContentItem; 
+           // setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                             
           })
           .catch(function (response) {
               console.log(response);  
@@ -626,132 +640,132 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 
 <style scoped>
-.container {
-  margin-left: 10px;
-  color: white;
-}
-.blockButtons {
-  display: inline-block;
-}
-.displaytable {
-  display: table;
-}
-.top_butts {
-  font-weight: bold;
-  font-size: large;
-}
-h1, h2 {
-  font-weight: normal;
-}
-.faButt {
-  background-color: white;
-  color: black;
-  border: 1px solid black;
-  padding-left: 8px;
-  padding-right: 8px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  margin-top: 5px;
-  margin-left: 5px;
-  margin-right: 5px;
-  margin-bottom: 5px;
-}
-.fa {
-   cursor: pointer;   
-   width: 50px;
-}
-.fa-power-off, .fa-cogs, .fa-info {
-  float: right;  
-  margin-right: 10px;
-  width: 50px;
-}
-.fa-times, .fa-pencil-square-o  {
-  float: right; 
-}
-.fa-star {
-  color:#337ab7;
-}
-.liButton {  
-  border: 1px solid black;
-  padding-left: 10px;
-  padding-right: 10px;
-  margin-bottom: 10px;
-}
-.liAbout {
-  cursor: pointer;
-  background-color: navy;
-  color: white
-}
-.liInfo {
-  background-color: gray;
-  color: white;
-}
-.liText {
-  background-color: navy;
-  color: white;
-}
-.liItem {
-  cursor: pointer;
-  background-color: black;  
-  margin-top: 10px;
-  height: 190px;
-  width: 190px;
-}
-.viewOptions {
-  margin-top: 10px;
-  margin-left: 20px;
-}
-.liItem2 {
-  cursor: pointer;  
-  border: 1px solid black;
-  background-color:darkgray;
-  color: black;
-  margin-top: 10px;
-  margin-left: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-.ViewList{
-  cursor: pointer;
-  background-color: black;
-  margin-top: 10px;
-  height: 190px;
-  width: 190px;
-}
-.boseimg {
-  border-radius: 25px;
-}
-a {
-  color: skyblue;
-}
-.view {
-  float: left;  
-  font-weight: lighter;  
-}
-.current_selection {
-  float: right; 
-  border: 1px solid grey;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  padding-left: 15px;
-  padding-right: 15px;
-  border-radius: 15px;
-  margin-right: 50px;
-}
-.editname {
-  padding-left: 50px;
-  padding-right: 50px;
-}
-.filterdiv {
-  width: 120px;
-  height: 52px;
-  cursor: pointer;
-  margin-left: 10px; 
-}
-.editPresets {
-  background-color: transparent;
-  color: white;
-  border-radius: 25px;
-  line-height: 1.5;
-}
+  .container {
+    margin-left: 10px;
+    color: white;
+  }
+  .blockButtons {
+    display: inline-block;
+  }
+  .displaytable {
+    display: table;
+  }
+  .top_butts {
+    font-weight: bold;
+    font-size: large;
+  }
+  h1, h2 {
+    font-weight: normal;
+  }
+  .faButt {
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin-top: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+  .fa {
+    cursor: pointer;   
+    width: 50px;
+  }
+  .fa-power-off, .fa-cogs, .fa-info {
+    float: right;  
+    margin-right: 10px;
+    width: 50px;
+  }
+  .fa-times, .fa-pencil-square-o  {
+    float: right; 
+  }
+  .fa-star {
+    color:#337ab7;
+  }
+  .liButton {  
+    border: 1px solid black;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 10px;
+  }
+  .liAbout {
+    cursor: pointer;
+    background-color: navy;
+    color: white
+  }
+  .liInfo {
+    background-color: gray;
+    color: white;
+  }
+  .liText {
+    background-color: navy;
+    color: white;
+  }
+  .liItem {
+    cursor: pointer;
+    background-color: black;  
+    margin-top: 10px;
+    height: 190px;
+    width: 190px;
+  }
+  .viewOptions {
+    margin-top: 10px;
+    margin-left: 20px;
+  }
+  .liItem2 {
+    cursor: pointer;  
+    border: 1px solid black;
+    background-color:darkgray;
+    color: black;
+    margin-top: 10px;
+    margin-left: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .ViewList{
+    cursor: pointer;
+    background-color: black;
+    margin-top: 10px;
+    height: 190px;
+    width: 190px;
+  }
+  .boseimg {
+    border-radius: 25px;
+  }
+  a {
+    color: skyblue;
+  }
+  .view {
+    float: left;  
+    font-weight: lighter;  
+  }
+  .current_selection {
+    float: right; 
+    border: 1px solid grey;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 15px;
+    margin-right: 50px;
+  }
+  .editname {
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+  .filterdiv {
+    width: 120px;
+    height: 52px;
+    cursor: pointer;
+    margin-left: 10px; 
+  }
+  .editPresets {
+    background-color: transparent;
+    color: white;
+    border-radius: 25px;
+    line-height: 1.5;
+  }
 </style>
