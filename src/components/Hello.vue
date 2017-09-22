@@ -561,6 +561,7 @@ export default {
                   console.log(_inlist);
                   if (_inlist.found)   
                     if ( this.selected_play.item != _inlist.item) {
+                       instance.now_playing_status = _inlist.name;
                        instance.play(_inlist);
                        return;
                     }
