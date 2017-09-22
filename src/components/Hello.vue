@@ -26,9 +26,7 @@
         </div>   
         <div class="view"  align="left">
              <i v-on:click="sortPlayList" class="fa fa-refresh fa-2x faButt" aria-hidden="true"></i>     
-             {{sortOrder}}                    
-             <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
-             <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>             
+             {{sortOrder}}                                     
              <div class="blockButtons">   
                 <i v-on:click="volume_up_down(-1)" class="fa fa-volume-down fa-2x faButt" aria-hidden="true"></i>
                 {{get_volume()}}               
@@ -47,6 +45,8 @@
         <div class="displaytable"  align="left">          
            <div v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
              <h4  class = "blockButtons" v-on:click="play(c)"> {{c.name}}</h4>
+             <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
+             <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>         
             <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
             <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i> 
             <div v-if="now_playing_track!=''">
@@ -176,23 +176,27 @@ export default {
       switch (this.filterMode) {
           case 0:
               this.filterMode = 1;
-              this.filterCaption = "Local Library";
+              this.filterCaption = "Local Library..";
               break;
           case 1:
               this.filterMode = 2;
-              this.filterCaption = "Internet Radio";
+              this.filterCaption = "Internet Radio..";
               break;
           case 2:
               this.filterMode = 3;
-              this.filterCaption = "Device Presets";
+              this.filterCaption = "Device Presets..";
               break;
           case 3:
+              this.filterMode = 4;
+              this.filterCaption = "Tune In..";
+              break;
+          case 4:
               this.filterMode = 0;
-              this.filterCaption = "All Sources";
+              this.filterCaption = "All Sources..";
               break;
           default:
               this.filterMode = 0;
-              this.filterCaption = "All Sources";
+              this.filterCaption = "All Sources..";
               break;
       } 
     },
@@ -244,6 +248,11 @@ export default {
         if  (typeof c.item.preset != "undefined") 
           return true;
       }
+      if (this.filterMode == 4)   {
+        if (c.item.indexOf("TUNEIN") > 0)
+          return true;
+      }
+      // TUNEIN
       return false;
     },
     canDoNextTrack(c) {
@@ -335,13 +344,6 @@ export default {
                _content.name = _name;
                _content.preset = true;
                this.presetItems.push(_content)
-               //console.log("presets push");  
-               //console.log(_content.name);
-               //var s = this.check_inlist_source_location(_content);
-              // console.log(s);
-              // if (s.found)
-              //    continue;
-              // this.add_content(_content);                  
           }
         });           
     },
@@ -532,7 +534,7 @@ export default {
                   _content = instance.boseObject.substring(startpos, endpos); 
                   //_content = _content.replace(/\"/g,'\\"');
                   instance.now_playing.item = _content;
-                  //console.log(instance.now_playing.item);
+                  console.log(instance.now_playing.item);
                   var parser = new DOMParser();
                   var xmlDoc = parser.parseFromString(instance.boseObject,"text/xml");                  
                   instance.now_playing.name =  xmlDoc.getElementsByTagName("itemName") [0].childNodes[0].nodeValue; 
@@ -559,15 +561,16 @@ export default {
                   var _inlist = this.check_inlist_source_location(instance.now_playing)   ;
                   console.log("_inlist");
                   console.log(_inlist);
-                  if (_inlist.found)   
+                  if (_inlist.found == true) {  
                     if ( this.selected_play.item != _inlist.item) {
                        instance.now_playing_status = _inlist.name;
                        instance.play(_inlist);
                        return;
                     }
+                  }  
                   else
-                    instance.now_playing_status = instance.now_playing.name;  
-                  setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                  
+                    instance.now_playing_status = instance.now_playing.name; 
+                  setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                              
                 })
                 .catch(function (response) {
                     console.log('get_now_playing');
@@ -603,6 +606,8 @@ export default {
 
       },
       play(ContentItem) {
+        // can save <offset>3</offset> in content to save and replay a particular track
+        
         //console.log(ContentItem.item);
         this.currentlyPausible = false;
         if (this.isPausable(ContentItem))
@@ -623,7 +628,7 @@ export default {
           .then(response => {
             instance.boseObject =  response.data; 
             instance.currentPlayingContent = ContentItem; 
-           // setTimeout(function(){ instance.get_now_playing(false)}, 5000);                                             
+           // setTimeoutsetTimeout(function(){ instance.get_now_playing(false)}, 5000);                                             
           })
           .catch(function (response) {
               console.log(response);  
