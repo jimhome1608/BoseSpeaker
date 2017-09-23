@@ -16,19 +16,23 @@
               <input type="text" class="form-control" placeholder="Enter IP of Bose Speaker" v-model="BoseSpeakerIP">
             </div><!-- /input-group -->
             <h4 v-bind:class="get_class()">{{statusline}}</h4>             
-             <br />             
-             <img src="../assets/Bose04.gif" height="320" width="380"/>
-            <div class="aboutme">               
-            <a href="http://www.jimclark.net.au" target="_blank">www.jimclark.net.au/</a><br />
-            </div>             
             <div class="deviceInfo h4" v-if="deviceInfo.hasOwnProperty('info')">
                 <hr>
                 Name: <strong>{{deviceInfo.info.name}}<br /></strong>
                 Type: <strong>{{deviceInfo.info.type}}<br /></strong>
                 IP Address: <strong>{{deviceInfo.info.networkInfo[0].ipAddress}}<br /></strong>
                 Software Version: <strong>{{get_device_software_version()}}<br /></strong>
-                <hr>
-            </div>
+                <div v-if="deviceInfo.info.type=='SoundTouch 30'">
+                <img src="../assets/Bose04.gif" height="320" width="360"/>
+                </div>
+             </div>
+             <div v-if="!deviceInfo.hasOwnProperty('info')">
+                 <br>
+                 <img src="../assets/Bose04.gif" height="320" width="360"/>
+             </div>
+            <div class="aboutme">               
+                <a href="http://www.jimclark.net.au" target="_blank">www.jimclark.net.au/</a><br />
+            </div>             
         </div> 
     </div>
 </template>
@@ -151,7 +155,7 @@
 .deviceInfo {
     background-color: white;
     color: black;
-    width: 80pc;
+    width: 380px;
     padding-left: 10px;
     padding-right: 10px;
      border-radius: 15px;
