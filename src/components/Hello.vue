@@ -43,8 +43,11 @@
         <br />
         
         <div class="displaytable"  align="left">          
+            <div class="current_selection filterdiv" align="left" v-on:click="onFilterClick" > 
+                {{filterCaption}}
+           </div> 
            <div v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
-             <h4  class = "blockButtons" v-on:click="play(c)"> {{c.name}}</h4>
+             <h4  class = "blockButtons" v-on:click="play(c)"> {{c.name}}</h4><br />
              <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
              <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>         
             <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
@@ -52,12 +55,10 @@
             <div v-if="now_playing_track!=''">
               {{now_playing_track}}
              </div>                        
-           </div>           
-        </div>
+           </div>                      
+        </div>        
+        
         <br />
-        <div class="current_selection filterdiv" align="left" v-on:click="onFilterClick" > 
-                {{filterCaption}}
-              </div> 
         <ul v-if="filterMode!=3" class="nav nav-pills">  
            <li v-if="notCurrentlyPlayAndNotFiltered(c)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
             <h4  v-on:click="play(c)"> {{c.name}}</h4>
@@ -175,21 +176,34 @@ export default {
       
       switch (this.filterMode) {
           case 0:
-              this.filterMode = 1;
-              this.filterCaption = "Local Library..";
-              break;
+              var _count = this.countContentItmes("STORED_MUSIC"); 
+              _count = _count + this.countContentItmes("LOCAL_MUSIC"); 
+              if (_count > 0) {
+                this.filterMode = 1;
+                this.filterCaption = "Local Library..";
+                break;
+              }
           case 1:
-              this.filterMode = 2;
-              this.filterCaption = "Internet Radio..";
-              break;
+              var _count = this.countContentItmes("INTERNET_RADIO"); 
+              if (_count > 0) {
+                  this.filterMode = 2;
+                  this.filterCaption = "Internet Radio..";
+                  break;
+              }
           case 2:
-              this.filterMode = 3;
-              this.filterCaption = "Device Presets..";
-              break;
+              var _count = this.presetItems.length; 
+              if (_count  > 0) {
+                  this.filterMode = 3;
+                  this.filterCaption = "Device Presets..";
+                  break;
+              }
           case 3:
-              this.filterMode = 4;
-              this.filterCaption = "Tune In..";
-              break;
+              var _count = this.countContentItmes("TUNEIN");
+              if (_count  > 0) {
+                   this.filterMode = 4;
+                  this.filterCaption = "Tune In..";
+                  break;              
+              }
           case 4:
               this.filterMode = 0;
               this.filterCaption = "All Sources..";
@@ -199,6 +213,21 @@ export default {
               this.filterCaption = "All Sources..";
               break;
       } 
+    },
+    countContentItmes(ContainsThisString) {
+      var _result = 0;
+      if (ContainsThisString.trim() == '' )
+        return this.contentItmes.length;
+      ContainsThisString = ContainsThisString.toUpperCase();  
+      var parser = new DOMParser();
+      for(var i in this.contentItmes){           
+          var xmlDocFromList = parser.parseFromString(this.contentItmes[i].item, "text/xml");  
+          var _item = this.contentItmes[i].item; 
+          _item = _item.toUpperCase();
+          if (_item.indexOf(ContainsThisString) > 0)                    
+            _result++;
+      };
+      return _result;
     },
     sortPlayList() {
       function compareAscName(a,b) {
@@ -623,7 +652,7 @@ export default {
         console.log(ContentItem.lastPlayed);
         var instance = this;
         var _url =  instance.get_ip()+":8090/select"; 
-        var _body =  ContentItem.item;                  
+        var _body =  ContentItem.item;
           axios.post(_url, _body)
           .then(response => {
             instance.boseObject =  response.data; 
@@ -756,7 +785,7 @@ export default {
     padding-left: 15px;
     padding-right: 15px;
     border-radius: 15px;
-    margin-right: 50px;
+    margin-right: 15px;
   }
   .editname {
     padding-left: 50px;
