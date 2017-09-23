@@ -21,18 +21,27 @@
             <div class="aboutme">               
             <a href="http://www.jimclark.net.au" target="_blank">www.jimclark.net.au/</a><br />
             </div>             
+            <div class="deviceInfo h4" v-if="deviceInfo.hasOwnProperty('info')">
+                <hr>
+                Name: <strong>{{deviceInfo.info.name}}<br /></strong>
+                Type: <strong>{{deviceInfo.info.type}}<br /></strong>
+                IP Address: <strong>{{deviceInfo.info.networkInfo[0].ipAddress}}<br /></strong>
+                Software Version: <strong>{{get_device_software_version()}}<br /></strong>
+                <hr>
+            </div>
         </div> 
-     
-        
     </div>
 </template>
 
 <script>
     import axios from 'axios';
+    // https://www.npmjs.com/package/jxon
+    import JXON from 'jxon';
     export default {
         name: 'Register',
         data () {
             return {
+                deviceInfo:{},
                 BoseSpeakerIP: "",
                 searchIP:"",
                 stopSearch: false,
@@ -42,11 +51,22 @@
         created: function () {
            if (localStorage.getItem("BoseSpeakerIP") != null) {
               this.BoseSpeakerIP = localStorage.getItem('BoseSpeakerIP');
+              this.get_info();
            }
         },
         computed: {
         },
         methods: {
+            get_device_software_version() {
+                if (!this.deviceInfo.hasOwnProperty('info'))
+                    return "";
+                var _swv =  this.deviceInfo.info.components.component[0].softwareVersion 
+               var  _pos = _swv.indexOf(' ');
+                if (_pos > 0)
+                   _swv = _swv.substring(0,_pos-1);
+                return (_swv);
+
+            },
             get_class() {
               if (this.statusline.indexOf("Found") >=0)
                 return"found";
@@ -71,6 +91,17 @@
                 this.stopSearch = false;
                 this.search_next(newipa);
 
+            },
+            get_info() {
+            this.deviceInfo = {};
+            var instance = this;
+            var _url =  "http://"+this.BoseSpeakerIP+":8090/info"; 
+            axios.get(_url)
+                .then(response => {                    
+                    //{{presetsFromXML.presets.preset[0].ContentItem.itemName}}   
+                    instance.deviceInfo = JXON.stringToJs(response.data);
+                    console.log(instance.deviceInfo.info.name);
+                });           
             },
             search_next(testip) {
                 if (this.stopSearch) {
@@ -117,6 +148,16 @@
 </script>
 
 <style  scoped>
+.deviceInfo {
+    background-color: white;
+    color: black;
+    width: 80pc;
+    padding-left: 10px;
+    padding-right: 10px;
+     border-radius: 15px;
+     line-height: 1.5;
+     text-align: left;
+}
 a {
     background-color: white;
     padding-left: 10px;

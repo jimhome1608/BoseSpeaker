@@ -1,7 +1,7 @@
 
 <template>
   <div class="wrapper">
-  <div class="container">     
+  <div class="container">      
     <div class="row"> 
       <div>
           <h3 align="left">Bose Speaker
@@ -97,13 +97,17 @@
 </template>
 
 <script>
+
 import axios from 'axios';
 import moment from 'moment';
+// https://www.npmjs.com/package/jxon
+import JXON from 'jxon';
 
 export default {
   name: 'hello',
   data () {
     return {
+      deviceInfo: {},
       sortOrder: "",
       edtName: "",      
       filterMode: 0,
@@ -123,6 +127,7 @@ export default {
       },
       ContentItem: '',
       contentItmesStore: "",
+      presetsFromXML: {},
       presetItems: [],
       contentItmes: [
         {                                  
@@ -346,34 +351,29 @@ export default {
       this.saveToLocalStorage();
 
     }, 
-    get_presets() {
+    get_presets(){
       var instance = this;
       var _url =  instance.get_ip()+":8090/presets"; 
        axios.get(_url)
-        .then(response => {
-          var parser = new DOMParser();
-          var xmlDoc = parser.parseFromString(response.data, "text/xml");  
-          var _source = "";
-          var _location = "";
-          var _sourceAccount = "";
-          var _name = "";
-          var _makeContent = "";          
-          var x = xmlDoc.getElementsByTagName("presets")[0].childNodes;
-          //console.log(x.length) ;
-          //console.log("merge_in_presets") ;
-          for (var i = 0; i < x.length ;i++) {
-               var _content = {item:"",name:""};
-               _source = x[i].getElementsByTagName("ContentItem")[0].getAttribute("source");
-               _location = x[i].getElementsByTagName("ContentItem")[0].getAttribute("location");
-               _sourceAccount = x[i].getElementsByTagName("ContentItem")[0].getAttribute("sourceAccount");//"0011327a-94ee-0011-ee94-ee947a321100/0"
-               _name = x[i].getElementsByTagName("itemName")[0].childNodes[0].nodeValue; 
-               _makeContent = 
-                  '<ContentItem source="'+_source+'" location="'+_location+'" sourceAccount="'+_sourceAccount+'"><itemName>'+_name+'</itemName><containerArt/></ContentItem>';
-               _content.item = _makeContent;
-               _content.name = _name;
-               _content.preset = true;
-               this.presetItems.push(_content)
-          }
+        .then(response => {                    
+          //{{presetsFromXML.presets.preset[0].ContentItem.itemName}}   
+          instance.presetsFromXML = JXON.stringToJs(response.data);
+          var _makeContent = "";
+          var c = {};
+          if (instance.presetsFromXML.hasOwnProperty('presets')) {
+              for (var p in instance.presetsFromXML.presets.preset) {
+                c = instance.presetsFromXML.presets.preset[p].ContentItem;
+                console.log(c.$location);   
+                _makeContent = 
+                  '<ContentItem source="'+c.$source+'" location="'+c.$location+'" sourceAccount="'+c.$sourceAccount+'"><itemName>'+c.itemName+'</itemName><containerArt/></ContentItem>';             
+                console.log(_makeContent);   
+                var _content = {item:"",name:""};
+                _content.item = _makeContent;
+                _content.name = c.itemName;
+                _content.preset = true;
+                instance.presetItems.push(_content)   
+              };
+          };
         });           
     },
     saveEditName(ContentItem, edtName) {
