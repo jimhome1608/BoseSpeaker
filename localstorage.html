@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div id="ls">
+
+</div>
+</body>
+<script>   
+        var _localStorage = "Local Storage Content: <br /><br />"
+        for (var key in localStorage) {
+            _localStorage = _localStorage +key+' <br />'
+            _localStorage = _localStorage +localStorage[key]+' <br /><br /><br />'
+           //console.log(key + ':' + localStorage[key]);
+        }  
+        var x = document.getElementById("ls"); 
+        x.innerHTML =  _localStorage; 
+    </script>
+</html> >

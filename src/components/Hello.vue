@@ -1,4 +1,5 @@
 
+
 <template>
   <div class="wrapper">
   <div class="container">      
@@ -51,13 +52,15 @@
              <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
              <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>         
             <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
-            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i> 
-            <div v-if="now_playing_track!=''">
-              {{now_playing_track}}
+            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i>             
+            <div v-if="now_playing_track!=''">              
+              <mark v-if="now_playing_track.indexOf('Changing to') >=0">{{now_playing_track}}</mark>
+              <div v-else>{{now_playing_track}}</div>
              </div>                        
            </div>                      
         </div>        
         
+
         <br />
         <ul v-if="filterMode!=3" class="nav nav-pills">  
            <li v-if="notCurrentlyPlayAndNotFiltered(c)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
@@ -483,7 +486,10 @@ export default {
        var _msg = _key.replace("_", " ");
        _msg = _msg.toLowerCase();
        _msg = capitalize_Words(_msg);
-       alertify.warning(_msg);
+       if (_key == "PREV_TRACK" || _key == "NEXT_TRACK" )
+          this.now_playing_track = "Changing to .. "+_msg;
+       else
+         alertify.warning(_msg);
        var instance = this;
        var _url = this.get_ip()+":8090/key";
        var _body =  '<key state="press" sender="Gabbo">'+_key+'</key>';
@@ -796,6 +802,11 @@ export default {
     height: 52px;
     cursor: pointer;
     margin-left: 10px; 
+  }
+  mark {
+    border-radius: 25px;
+    padding-left: 15px;
+    padding-right: 15px;
   }
   .editPresets {
     background-color: transparent;
