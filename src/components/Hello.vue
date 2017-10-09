@@ -2,9 +2,9 @@
 
 <template>
   <div class="wrapper">
-  <div class="container">      
+  <div class="container">         
     <div class="row"> 
-      <div>
+      <div>        
           <h3 align="left">Bose Speaker
              <i class="fa fa-info" aria-hidden="true" v-on:click="open_video"></i>            
             <i v-on:click="post_key('POWER')" class="fa fa-power-off" aria-hidden="true"></i>         
@@ -12,7 +12,7 @@
           </h3>
       </div>   
   
-        <div align="left">   
+        <div align="left" >   
           <h3 align="left">&nbsp;{{now_playing_status}}&nbsp;
           <i  v-on:click="get_now_playing(true)" class="fa fa-music faButt" aria-hidden="true"></i>          
           <i v-on:click="add_content(now_playing)" v-if="now_playing.name!=''"  class="fa fa-star faButt" aria-hidden="true"></i>
@@ -103,11 +103,15 @@
 
 import axios from 'axios';
 import moment from 'moment';
+// import Backup from '@/components/backup'
+
 // https://www.npmjs.com/package/jxon
 import JXON from 'jxon';
 
 export default {
   name: 'hello',
+  components: {
+  },
   data () {
     return {
       deviceInfo: {},
@@ -640,13 +644,35 @@ export default {
         this.play(random_content);
 
       },
+      log_to_backend(ContentItem) {
+                this.event_log_error = false;
+                console.log("log_to_backend");
+                //var _url = "http://localhost:51935/api/EventLog";   
+                var _url = "http://api.jimclark.net.au/api/EventLog";   
+                var _body = '{"action":"insert","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":""},"items":[]} ';
+                var _bodyObject = JSON.parse(_body);
+                _bodyObject.data.action = "Play";                
+                _bodyObject.data.action_data = ContentItem.item;
+                _bodyObject.data.action_tag1 = ContentItem.name;
+                // console.log(_bodyObject);
+                //axios.post(_url,_body, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                axios.post(_url,_bodyObject)
+                .then(function (response) {
+                    console.log(response.body);
+                })
+                .catch(function (response) {
+                   console.log(response);
+                });
+            },
       play(ContentItem) {
         // can save <offset>3</offset> in content to save and replay a particular track
         
-        //console.log(ContentItem.item);
+        this.log_to_backend(ContentItem);
+
         this.currentlyPausible = false;
         if (this.isPausable(ContentItem))
           this.currentlyPausible = true;
+        
         alertify.message("Opening ["+ContentItem.name+"]");
         this.edtName = ContentItem.name;
         this.now_playing_info = "Changing Station";
