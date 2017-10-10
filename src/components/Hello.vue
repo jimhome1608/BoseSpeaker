@@ -19,11 +19,39 @@
           <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>     
            <div class="blockButtons">                                             
               <i v-if="openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-open-o faButt" aria-hidden="true">..</i>   
-              <i v-if="openChangeInput" v-on:click="email_contents" class="fa fa-share-alt faButt" aria-hidden="true"></i>   
               <i v-if="openChangeInput" v-on:click="post_key('AUX_INPUT')" class="fa fa-microphone faButt" aria-hidden="true"></i>   
               <i v-if="openChangeInput" v-on:click="open_random_content" class="fa fa-exclamation faButt" aria-hidden="true"></i>                 
            </div> 
-          </h3>                                                                                                     
+           
+          </h3>    
+          <div align="left" v-if="openChangeInput">
+            Whats been playing...
+            </table>
+            <table class="table highlighted">
+                <thead>
+                <tr>
+                  <!--  <th class="nighttime">{{events.records.length}} Events</th> -->
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Name</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr  v-for="r in event_log">
+                      <td align="left"> {{getDate(r.time_stamp)}}</td>
+                      <td align="left"> {{getTime(r.time_stamp)}}</td>
+                      <td align="left" > {{r.action_tag1}}  </td>
+                      <td>
+                        <button class="playButt" v-on:click="playFromBackend(r.action_data)" >Play
+                        <i  class="fa fa-play-circle" aria-hidden="true"></i>
+                        </button>
+
+                      </td>
+                      
+                  </tr>
+                </tbody>
+            </table>
+        </div>                                                                                              
         </div>   
         <div class="view"  align="left">
              <i v-on:click="sortPlayList" class="fa fa-refresh fa-2x faButt" aria-hidden="true"></i>     
@@ -95,7 +123,9 @@
         </div>    
     </div>    
   </div>
+  
   </div>
+
 
 </template>
 
@@ -103,7 +133,8 @@
 
 import axios from 'axios';
 import moment from 'moment';
-// import Backup from '@/components/backup'
+import Backup from '@/components/backup'
+
 
 // https://www.npmjs.com/package/jxon
 import JXON from 'jxon';
@@ -111,9 +142,11 @@ import JXON from 'jxon';
 export default {
   name: 'hello',
   components: {
+     backup: Backup,  
   },
   data () {
     return {
+      event_log:[],
       deviceInfo: {},
       sortOrder: "",
       edtName: "",      
@@ -168,6 +201,7 @@ export default {
       else {
         this.saveToLocalStorage();
       };
+      this.load_from_backend();
       this.get_presets();
       this.get_now_playing(false);
   },
@@ -181,6 +215,16 @@ export default {
             win.focus();
            });
     },
+    getDate: function(dt) {
+                 var result = moment(dt);
+                 result = result.format('ddd. DD-MMM');
+                 return result;
+             },
+             getTime: function(dt) {
+                 var result = moment(dt);
+                 result = result.format('hh:mm a');
+                 return result;
+             },
     saveToLocalStorage() {
         localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes)); 
     }, 
@@ -436,6 +480,7 @@ export default {
     },
     toggle_openChangeInput () {
       this.openChangeInput = ! this.openChangeInput;
+      
     },
     get_bass() {
       if (this.bass == 10) return "";
@@ -644,6 +689,29 @@ export default {
         this.play(random_content);
 
       },
+      load_from_backend() {
+                console.log("load_from_backend");                
+                //http://localhost:51935/
+                // var _url = "http://localhost:51935/api/EventLog";   
+                //  {"action":"insert","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":"play","action_data":""},"items":[]}
+                var _url = "http://api.jimclark.net.au/api/EventLog";        
+                var _body = '{"action":"select","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":"","action_data":""},"items":[]}';
+                var _bodyObject = JSON.parse(_body);
+                 console.log(_bodyObject);
+                 var instance = this;
+                axios.post(_url,_bodyObject)
+                .then(function (response) {
+                  var _reply = JSON.stringify(response.data.items);
+                   console.log(_reply);
+                  var _replyObject = response.data;
+                 // alertify.warning(_replyObject.items);
+                   // console.log(_replyObject);
+                  instance.event_log = JSON.parse(_reply);
+                })
+                .catch(function (response) {
+                   console.log(response);
+                });
+            },
       log_to_backend(ContentItem) {
                 this.event_log_error = false;
                 console.log("log_to_backend");
@@ -685,6 +753,25 @@ export default {
         var instance = this;
         var _url =  instance.get_ip()+":8090/select"; 
         var _body =  ContentItem.item;
+          axios.post(_url, _body)
+          .then(response => {
+            instance.boseObject =  response.data; 
+            instance.currentPlayingContent = ContentItem; 
+           // setTimeoutsetTimeout(function(){ instance.get_now_playing(false)}, 5000);                                             
+          })
+          .catch(function (response) {
+              console.log(response);  
+              instance.now_playing_status = "Failed to connect on "+instance.BoseSpeakerIP+".  Click Cogs to change settings";
+              alertify.warning("Failed to connect on "+instance.BoseSpeakerIP+"<br />Click Cogs to change settings");
+            });
+
+      },      
+       playFromBackend(ContentItem) {
+        // can save <offset>3</offset> in content to save and replay a particular track
+
+        var instance = this;
+        var _url =  instance.get_ip()+":8090/select"; 
+        var _body =  ContentItem;
           axios.post(_url, _body)
           .then(response => {
             instance.boseObject =  response.data; 
@@ -740,6 +827,10 @@ export default {
   .fa {
     cursor: pointer;   
     width: 50px;
+  }
+  .playButt {
+    background-color: navy;
+    border: 1px solid navy;
   }
   .fa-power-off, .fa-cogs, .fa-info {
     float: right;  
