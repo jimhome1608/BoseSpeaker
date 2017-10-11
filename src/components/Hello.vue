@@ -34,7 +34,8 @@
                     <th>Date</th>
                     <th>Time</th>
                     <th>Name</th>
-                    <th>Speaker location</th>
+                    <th>Location</th>
+                    <th class="serialnumber">Serial #</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -42,7 +43,8 @@
                       <td align="left"> {{getDate(r.time_stamp)}}</td>
                       <td align="left"> {{getTime(r.time_stamp)}}</td>
                       <td align="left" > {{r.action_tag1}}  </td>
-                      <td align="left" > {{r.visitor.country}}&nbsp;-&nbsp;{{r.visitor.city}} </td>
+                      <td align="left" > {{r.visitor.country}}<br />{{r.visitor.city}} </td>
+                      <td align="left" class="serialnumber" v-html="break_half(r.action_tag2)"> </td>
                       <td>
                         <button class="playButt" v-on:click="playFromBackend(r.action_data)" >Play
                         <i  class="fa fa-play-circle" aria-hidden="true"></i>
@@ -203,6 +205,7 @@ export default {
       else {
         this.saveToLocalStorage();
       };
+      this.get_info();
       this.load_from_backend();
       this.get_presets();
       this.get_now_playing(false);
@@ -210,6 +213,20 @@ export default {
   computed: {
   },
   methods: {
+    get_device_serialnumber() {
+        if (!this.deviceInfo.hasOwnProperty('info'))
+            return ""; //serialNumber
+        var _swv =  this.deviceInfo.info.components.component[1].serialNumber;
+        var _result =_swv;        
+        return (_result);
+    },
+    break_half(s) {
+      var half = s.length/2;
+      if (half < 4)
+        return (s);
+      var _result = s.substring(1,half)+"<BR />"+s.substring(half);
+      return (_result);
+    },
     open_video() {
         alertify.confirm("This video will take a moment or 2 to load so you will need to be patient...", 
           function(){
@@ -482,6 +499,8 @@ export default {
     },
     toggle_openChangeInput () {
       this.openChangeInput = ! this.openChangeInput;
+      if (this.openChangeInput)
+       this.load_from_backend();
       
     },
     get_bass() {
@@ -497,6 +516,18 @@ export default {
       if (this.volume == -10) return "";
       return ""+this.volume+"%";
 
+    },
+    get_info() {
+        this.deviceInfo = {};
+        var instance = this;
+        //http://10.0.0.49:8090/info
+        var _url =  this.get_ip()+":8090/info"; 
+        axios.get(_url)
+        .then(response => {                    
+            //{{presetsFromXML.presets.preset[0].ContentItem.itemName}}   
+            instance.deviceInfo = JXON.stringToJs(response.data);
+            console.log(instance.deviceInfo.info.name);
+        });           
     },
      bass_up_down(up_value) {
        var instance = this;
@@ -724,7 +755,9 @@ export default {
                 _bodyObject.data.action = "Play";                
                 _bodyObject.data.action_data = ContentItem.item;
                 _bodyObject.data.action_tag1 = ContentItem.name;
-               // console.log(JSON.stringify(_bodyObject));
+                _bodyObject.data.action_tag2 = this.get_device_serialnumber();
+                
+                console.log(JSON.stringify(_bodyObject));
                 //axios.post(_url,_body, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
                 axios.post(_url,_bodyObject)
                 .then(function (response) {
@@ -873,6 +906,9 @@ export default {
   .viewOptions {
     margin-top: 10px;
     margin-left: 20px;
+  }
+  .serialnumber{
+    font-size: xx-small;
   }
   .liItem2 {
     cursor: pointer;  

@@ -22,6 +22,7 @@
                 Type: <strong>{{deviceInfo.info.type}}<br /></strong>
                 IP Address: <strong>{{deviceInfo.info.networkInfo[0].ipAddress}}<br /></strong>
                 Software Version: <strong>{{get_device_software_version()}}<br /></strong>
+                Serial Number: <strong>{{get_device_serialnumber()}}<br /></strong>                
                 <div v-if="deviceInfo.info.type=='SoundTouch 30'">
                 <img src="../assets/Bose04.gif" height="320" width="360"/>
                 </div>
@@ -61,9 +62,15 @@
         computed: {
         },
         methods: {
+            get_device_serialnumber() {
+                if (!this.deviceInfo.hasOwnProperty('info'))
+                    return ""; //serialNumber
+                var _swv =  this.deviceInfo.info.components.component[1].serialNumber;
+                return (_swv);
+            },
             get_device_software_version() {
                 if (!this.deviceInfo.hasOwnProperty('info'))
-                    return "";
+                    return ""; //serialNumber
                 var _swv =  this.deviceInfo.info.components.component[0].softwareVersion 
                var  _pos = _swv.indexOf(' ');
                 if (_pos > 0)
@@ -99,6 +106,7 @@
             get_info() {
             this.deviceInfo = {};
             var instance = this;
+            //http://10.0.0.49:8090/info
             var _url =  "http://"+this.BoseSpeakerIP+":8090/info"; 
             axios.get(_url)
                 .then(response => {                    
