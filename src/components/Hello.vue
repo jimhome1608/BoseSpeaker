@@ -19,8 +19,8 @@
           <i v-if="!openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-o faButt" aria-hidden="true">..</i>     
            <div class="blockButtons">                                             
               <i v-if="openChangeInput" v-on:click="toggle_openChangeInput" class="fa fa-folder-open-o faButt" aria-hidden="true">..</i>   
-              <i v-if="openChangeInput" v-on:click="post_key('AUX_INPUT')" class="fa fa-microphone faButt" aria-hidden="true"></i>   
-              <i v-if="openChangeInput" v-on:click="open_random_content" class="fa fa-exclamation faButt" aria-hidden="true"></i>                 
+             <!-- <i v-if="openChangeInput" v-on:click="post_key('AUX_INPUT')" class="fa fa-microphone faButt" aria-hidden="true"></i>   
+              <i v-if="openChangeInput" v-on:click="open_random_content" class="fa fa-exclamation faButt" aria-hidden="true"></i> -->
            </div> 
            
           </h3>    
@@ -34,6 +34,7 @@
                     <th>Date</th>
                     <th>Time</th>
                     <th>Name</th>
+                    <th>Speaker location</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -41,6 +42,7 @@
                       <td align="left"> {{getDate(r.time_stamp)}}</td>
                       <td align="left"> {{getTime(r.time_stamp)}}</td>
                       <td align="left" > {{r.action_tag1}}  </td>
+                      <td align="left" > {{r.visitor.country}}&nbsp;-&nbsp;{{r.visitor.city}} </td>
                       <td>
                         <button class="playButt" v-on:click="playFromBackend(r.action_data)" >Play
                         <i  class="fa fa-play-circle" aria-hidden="true"></i>
@@ -722,7 +724,7 @@ export default {
                 _bodyObject.data.action = "Play";                
                 _bodyObject.data.action_data = ContentItem.item;
                 _bodyObject.data.action_tag1 = ContentItem.name;
-                // console.log(_bodyObject);
+               // console.log(JSON.stringify(_bodyObject));
                 //axios.post(_url,_body, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
                 axios.post(_url,_bodyObject)
                 .then(function (response) {
@@ -734,9 +736,7 @@ export default {
             },
       play(ContentItem) {
         // can save <offset>3</offset> in content to save and replay a particular track
-        
-        this.log_to_backend(ContentItem);
-
+                
         this.currentlyPausible = false;
         if (this.isPausable(ContentItem))
           this.currentlyPausible = true;
@@ -757,6 +757,7 @@ export default {
           .then(response => {
             instance.boseObject =  response.data; 
             instance.currentPlayingContent = ContentItem; 
+            instance.log_to_backend(ContentItem);
            // setTimeoutsetTimeout(function(){ instance.get_now_playing(false)}, 5000);                                             
           })
           .catch(function (response) {
