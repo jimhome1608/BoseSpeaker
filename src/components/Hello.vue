@@ -750,7 +750,7 @@ export default {
                 console.log("log_to_backend");
                 //var _url = "http://localhost:51935/api/EventLog";   
                 var _url = "http://api.jimclark.net.au/api/EventLog";   
-                var _body = '{"action":"insert","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":""},"items":[]} ';
+                var _body = '{"action":"update","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":""},"items":[]} ';
                 var _bodyObject = JSON.parse(_body);
                 _bodyObject.data.action = "Play";                
                 _bodyObject.data.action_data = ContentItem.item;

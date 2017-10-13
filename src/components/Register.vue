@@ -104,16 +104,16 @@
 
             },
             get_info() {
-            this.deviceInfo = {};
-            var instance = this;
-            //http://10.0.0.49:8090/info
-            var _url =  "http://"+this.BoseSpeakerIP+":8090/info"; 
-            axios.get(_url)
-                .then(response => {                    
-                    //{{presetsFromXML.presets.preset[0].ContentItem.itemName}}   
-                    instance.deviceInfo = JXON.stringToJs(response.data);
-                    console.log(instance.deviceInfo.info.name);
-                });           
+                this.deviceInfo = {};
+                var instance = this;
+                //http://10.0.0.49:8090/info
+                var _url =  "http://"+this.BoseSpeakerIP+":8090/info"; 
+                axios.get(_url)
+                    .then(response => {                    
+                        //{{presetsFromXML.presets.preset[0].ContentItem.itemName}}   
+                        instance.deviceInfo = JXON.stringToJs(response.data);
+                        console.log(instance.deviceInfo.info.name);
+                    });           
             },
             search_next(testip) {
                 if (this.stopSearch) {
