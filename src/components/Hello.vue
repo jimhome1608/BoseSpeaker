@@ -5,10 +5,11 @@
   <div class="container">         
     <div class="row"> 
       <div>        
+        
           <h3 align="left">Bose Speaker
-             <i class="fa fa-info" aria-hidden="true" v-on:click="open_video"></i>            
+            <i class="fa fa-info" aria-hidden="true" v-on:click="open_video"></i>            
             <i v-on:click="post_key('POWER')" class="fa fa-power-off" aria-hidden="true"></i>         
-            <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i>              
+            <i v-on:click="open_register_screen" class="fa fa-cogs" aria-hidden="true"></i>                           
           </h3>
       </div>   
   
@@ -108,12 +109,13 @@
         <div v-if="selected_play.item!=''">          
           <hr style="height:1px;border:none;color:#333;background-color:#333;" />         
            <div v-if="filterMode!=3"> 
-           <div  class="input-group editname">             
+             <input  v-model="searchString"  type="text" class="form-control inputSearch" placeholder="Search" ><br />
+           <div  class="input-group editname">                          
               <span class="input-group-btn">
                 <button class="btn btn-primary" type="button" v-on:click="saveEditName(selected_play, edtName)" >
                   Save
                 </button>
-              </span>
+              </span>              
               <input type="text" class="form-control" placeholder="" v-model="edtName">
             </div><!-- /input-group -->
             <br />          
@@ -150,6 +152,7 @@ export default {
   },
   data () {
     return {
+      searchString: "",
       event_log:[],
       deviceInfo: {},
       sortOrder: "",
@@ -338,6 +341,10 @@ export default {
 
     },
     isNotFiltered(c) {
+      if (this.searchString.length > 0) {
+        if (c.item.toLowerCase().indexOf(this.searchString.toLowerCase()) < 0) 
+          return false;
+      }
       if (this.filterMode == 0)
         return true;
       if (this.filterMode == 2)   {
@@ -727,6 +734,7 @@ export default {
                 //http://localhost:51935/
                 // var _url = "http://localhost:51935/api/EventLog";   
                 //  {"action":"insert","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":"play","action_data":""},"items":[]}
+                //Search for ...select * from event_log where source = 'bosespeaker' and ( action_data like '%jazz%' or action_tag1 like '%jazz%')
                 var _url = "http://api.jimclark.net.au/api/EventLog";        
                 var _body = '{"action":"select","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":"","action_data":""},"items":[]}';
                 var _bodyObject = JSON.parse(_body);
@@ -967,5 +975,9 @@ export default {
     color: white;
     border-radius: 25px;
     line-height: 1.5;
+  }
+  .inputSearch {
+    margin-left: 50px;
+    width: 300px;
   }
 </style>
