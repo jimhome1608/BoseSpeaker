@@ -106,11 +106,10 @@
            </li>
         </ul>     
         <br />   
+         <input  v-model="searchString"  type="text" class="form-control inputSearch" placeholder="Search" ><br />
         <div v-if="selected_play.item!=''">          
           <hr style="height:1px;border:none;color:#333;background-color:#333;" />         
-           <div v-if="filterMode!=3"> 
-             <input  v-model="searchString"  type="text" class="form-control inputSearch" placeholder="Search" ><br />
-           <div  class="input-group editname">                          
+            <div  class="input-group editname">                          
               <span class="input-group-btn">
                 <button class="btn btn-primary" type="button" v-on:click="saveEditName(selected_play, edtName)" >
                   Save
