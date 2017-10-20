@@ -36,7 +36,7 @@
                     <th>Time</th>
                     <th>Name</th>
                     <th>Location</th>
-                    <th class="serialnumber">Serial #</th>
+                    <th>Source</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -44,10 +44,9 @@
                       <td align="left"> {{getDate(r.time_stamp)}}</td>
                       <td align="left"> {{getTime(r.time_stamp)}}</td>
                       <td align="left" > {{r.action_tag1}}  </td>
-                      <td align="left" > {{r.visitor.country}}<br />{{r.visitor.city}} </td>
-                      <td align="left" class="serialnumber" v-html="break_half(r.action_tag2)"> </td>
-                      <td>
-                        <button class="playButt" v-on:click="playFromBackend(r.action_data)" >Play
+                      <td align="left" > {{r.visitor.country}} </td>
+                      <td align="left" > {{getContentType(r.action_data)}}<td>
+                        <button v-if="isInternetRadioContent(r.action_data)" class="playButt" v-on:click="playFromBackend(r.action_data)" >Play
                         <i  class="fa fa-play-circle" aria-hidden="true"></i>
                         </button>
 
@@ -221,7 +220,7 @@ export default {
         var _swv =  this.deviceInfo.info.components.component[1].serialNumber;
         var _result =_swv;        
         return (_result);
-    },
+    },    
     break_half(s) {
       var half = s.length/2;
       if (half < 4)
@@ -364,6 +363,20 @@ export default {
       }
       // TUNEIN
       return false;
+    },
+    getContentType(c) {
+      if (c ==undefined) return "";
+      if (c.indexOf("INTERNET_RADIO") > 0) return "Internet Radio";
+      if (c.indexOf("STORED_MUSIC") > 0) return "Local File ";
+      if (c.indexOf("LOCAL_MUSIC") > 0) return "Local File ";
+      if (c.indexOf("TUNEIN") > 0) return "Tune In";
+      return "Other";
+
+    },
+    isInternetRadioContent(c) {
+       if (c ==undefined) return false;
+       if (c.indexOf("INTERNET_RADIO") > 0) return true;
+       return false;
     },
     canDoNextTrack(c) {
       if (c.item.indexOf("STORED_MUSIC") > 0)
@@ -730,10 +743,10 @@ export default {
       },
       load_from_backend() {
                 console.log("load_from_backend");                
-                //http://localhost:51935/
-                // var _url = "http://localhost:51935/api/EventLog";   
+                //http://localhost:51935/                
                 //  {"action":"insert","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":"play","action_data":""},"items":[]}
                 //Search for ...select * from event_log where source = 'bosespeaker' and ( action_data like '%jazz%' or action_tag1 like '%jazz%')
+                //var _url = "http://localhost:51935/api/EventLog";   
                 var _url = "http://api.jimclark.net.au/api/EventLog";        
                 var _body = '{"action":"select","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":"","action_data":""},"items":[]}';
                 var _bodyObject = JSON.parse(_body);
@@ -755,14 +768,14 @@ export default {
       log_to_backend(ContentItem) {
                 this.event_log_error = false;
                 console.log("log_to_backend");
-                //var _url = "http://localhost:51935/api/EventLog";   
+                // var _url = "http://localhost:51935/api/EventLog";   
                 var _url = "http://api.jimclark.net.au/api/EventLog";   
                 var _body = '{"action":"update","api_key":"iamyumikowatanabe24121970","data":{"source":"bosespeaker","user":"","action":""},"items":[]} ';
                 var _bodyObject = JSON.parse(_body);
                 _bodyObject.data.action = "Play";                
                 _bodyObject.data.action_data = ContentItem.item;
                 _bodyObject.data.action_tag1 = ContentItem.name;
-                _bodyObject.data.action_tag2 = this.get_device_serialnumber();
+                _bodyObject.data.action_tag3 = "same_ip_address"
                 
                 console.log(JSON.stringify(_bodyObject));
                 //axios.post(_url,_body, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
