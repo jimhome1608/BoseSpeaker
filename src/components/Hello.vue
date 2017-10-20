@@ -125,9 +125,12 @@
                Ability to add/remove presets on device from this app are planned for future updates
             </div>             
         </div>    
-    </div>    
-  </div>
-  
+    </div> 
+    <br />  
+    <hr>
+     <img class="img_splash" :src='randomImage'/>  
+     <br /> 
+  </div>  
   </div>
 
 
@@ -150,6 +153,7 @@ export default {
   },
   data () {
     return {
+      randomImage:"",
       searchString: "",
       event_log:[],
       deviceInfo: {},
@@ -210,6 +214,7 @@ export default {
       this.load_from_backend();
       this.get_presets();
       this.get_now_playing(false);
+      this.fetchRandomImage();
   },
   computed: {
   },
@@ -370,6 +375,8 @@ export default {
       if (c.indexOf("STORED_MUSIC") > 0) return "Local File ";
       if (c.indexOf("LOCAL_MUSIC") > 0) return "Local File ";
       if (c.indexOf("TUNEIN") > 0) return "Tune In";
+      if (c.indexOf("PANDORA") > 0) return "Pandora";
+      
       return "Other";
 
     },
@@ -838,7 +845,33 @@ export default {
               alertify.warning("Failed to connect on "+instance.BoseSpeakerIP+"<br />Click Cogs to change settings");
             });
 
-      },      
+      }, 
+      fetchRandomImage() {
+          // const clientId = '47da73da2b740608b32dd1d201e72606000e8db1df885e6f2c72843cddca23a8'
+          // mine const clientId = 'af75ff63f6f032b2637c95417a691c9bbab5a884a4f245bab3f6304bebe43147';
+          axios.get('https://api.unsplash.com/photos/random', {
+              params: {
+              // page: this.page++,
+              //per_page: PAGE_COUNT,
+              w:400,
+              h:400,
+              client_id: 'af75ff63f6f032b2637c95417a691c9bbab5a884a4f245bab3f6304bebe43147'
+              }
+          }).then(res => {
+              console.log(res.data.urls.custom);
+              if (screen.width < 800)
+                  this.randomImage = res.data.urls.small;
+              else
+                  this.randomImage = res.data.urls.regular;
+              /*
+              if(this.allPhotos == null) {
+              this.allPhotos = res.data
+              } else {
+              this.allPhotos = this.allPhotos.concat(res.data)
+              }
+              this.isLoading = false*/
+          })
+        },     
   }
 }
 
@@ -848,6 +881,27 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 
 <style scoped>
+  ul {
+  }
+  img_splash{
+    width: 100%;
+  }
+  .liItem2 {
+    cursor: pointer;  
+    border: 2px solid white;
+    background-color:silver;
+    border-radius: 10px;
+    color: black;
+    margin-top: 5px;
+    margin-left: 5px;
+    margin-right: 10px;
+   
+   
+  }
+  h4 {      
+    padding-left: 10px;
+    padding-right: 10px;
+  }
   .container {
     margin-left: 10px;
     color: white;
@@ -930,16 +984,7 @@ export default {
   .serialnumber{
     font-size: xx-small;
   }
-  .liItem2 {
-    cursor: pointer;  
-    border: 1px solid black;
-    background-color:darkgray;
-    color: black;
-    margin-top: 10px;
-    margin-left: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
-  }
+
   .ViewList{
     cursor: pointer;
     background-color: black;
