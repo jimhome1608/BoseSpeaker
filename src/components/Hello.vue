@@ -2,7 +2,7 @@
 
 <template>
   <div class="wrapper">
-  <div class="container">         
+  <div class="container">  
     <div class="row"> 
       <div>        
         
@@ -113,11 +113,12 @@
                 <button class="btn btn-primary" type="button" v-on:click="saveEditName(selected_play, edtName)" >
                   Save
                 </button>
+                 <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger">Remove </button>
               </span>              
               <input type="text" class="form-control" placeholder="" v-model="edtName">
             </div><!-- /input-group -->
             <br />          
-            <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger">Remove </button>
+           
             </div>   
              <div class="editPresets h4" v-if="filterMode==3" align="left"> 
                Edit and Remove functions not available for your current view of <mark><strong>Device Presets</strong></mark>.  <br />
@@ -126,8 +127,6 @@
             </div>             
         </div>    
     </div> 
-    <br />  
-    <hr>
      <img class="img_splash" :src='randomImage'/>  
      <br /> 
   </div>  
@@ -153,6 +152,7 @@ export default {
   },
   data () {
     return {
+      my_ip_address: {},
       randomImage:"",
       searchString: "",
       event_log:[],
@@ -244,12 +244,12 @@ export default {
                  var result = moment(dt);
                  result = result.format('ddd. DD-MMM');
                  return result;
-             },
-             getTime: function(dt) {
-                 var result = moment(dt);
-                 result = result.format('hh:mm a');
-                 return result;
-             },
+    },
+    getTime: function(dt) {
+        var result = moment(dt);
+        result = result.format('hh:mm a');
+        return result;
+    },
     saveToLocalStorage() {
         localStorage.setItem("contentItmesStore",JSON.stringify(this.contentItmes)); 
     }, 
@@ -382,6 +382,7 @@ export default {
     },
     isInternetRadioContent(c) {
        if (c ==undefined) return false;
+       if (this.my_ip_address = "220.244.249.125 ") return true; // Author's IP 
        if (c.indexOf("INTERNET_RADIO") > 0) return true;
        return false;
     },
@@ -485,11 +486,12 @@ export default {
         };
       this.saveToLocalStorage();
     }, 
-    remove_content(ContentItem) {
+    remove_content (ContentItem) {
         if (this.contentItmes.length == 1) {
             alertify.warning("You must keep at least one item in the list");
             return;
         };
+        
         for(var i in this.contentItmes){
             if (this.contentItmes[i].name != ContentItem.name)
               continue;
@@ -763,10 +765,12 @@ export default {
                 .then(function (response) {
                   var _reply = JSON.stringify(response.data.items);
                    console.log(_reply);
-                  var _replyObject = response.data;
+                  var _replyObject = response.data;                  
                  // alertify.warning(_replyObject.items);
-                   // console.log(_replyObject);
+                 //{{my_ip_address.data.ip_address}}     
+                  instance.my_ip_address = _replyObject.data.ip_address;
                   instance.event_log = JSON.parse(_reply);
+                  //my_ip_address
                 })
                 .catch(function (response) {
                    console.log(response);
@@ -894,9 +898,10 @@ export default {
     color: black;
     margin-top: 5px;
     margin-left: 5px;
-    margin-right: 10px;
-   
-   
+    margin-right: 10px;      
+  }
+  .liItem2:hover {
+    background-color:skyblue;
   }
   h4 {      
     padding-left: 10px;
