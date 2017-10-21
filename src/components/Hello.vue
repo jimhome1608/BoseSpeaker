@@ -2,7 +2,8 @@
 
 <template>
   <div class="wrapper">
-  <div class="container">  
+  <div class="container">
+    {{randomImageUser}}  
     <div class="row"> 
       <div>        
         
@@ -46,7 +47,7 @@
                       <td align="left" > {{r.action_tag1}}  </td>
                       <td align="left" > {{r.visitor.country}} </td>
                       <td align="left" > {{getContentType(r.action_data)}}<td>
-                        <button v-if="isInternetRadioContent(r.action_data)" class="playButt" v-on:click="playFromBackend(r.action_data)" >Play
+                        <button v-if="isInternetRadioContent(r)" class="playButt" v-on:click="playFromBackend(r.action_data)" >Play
                         <i  class="fa fa-play-circle" aria-hidden="true"></i>
                         </button>
 
@@ -105,7 +106,7 @@
            </li>
         </ul>     
         <br />   
-         <input  v-model="searchString"  type="text" class="form-control inputSearch" placeholder="Search" ><br />
+         <input v-if="contentItmes.length>10" v-model="searchString"  type="text" class="form-control inputSearch" placeholder="Search" ><br />
         <div v-if="selected_play.item!=''">          
           <hr style="height:1px;border:none;color:#333;background-color:#333;" />         
             <div  class="input-group editname">                          
@@ -127,7 +128,9 @@
             </div>             
         </div>    
     </div> 
-     <img class="img_splash" :src='randomImage'/>  
+     <img class="img_splash" :src='randomImage.image'/> 
+     <br /> 
+     <a :href='randomImage.userLink' target="_blank">Photographer:  {{randomImage.userName}}</a>
      <br /> 
   </div>  
   </div>
@@ -153,7 +156,7 @@ export default {
   data () {
     return {
       my_ip_address: {},
-      randomImage:"",
+      randomImage: {},
       searchString: "",
       event_log:[],
       deviceInfo: {},
@@ -382,8 +385,8 @@ export default {
     },
     isInternetRadioContent(c) {
        if (c ==undefined) return false;
-       if (this.my_ip_address = "220.244.249.125 ") return true; // Author's IP 
-       if (c.indexOf("INTERNET_RADIO") > 0) return true;
+       if (this.my_ip_address == c.ip_address) return true; // Author's IP 
+       if (c.action_data.indexOf("INTERNET_RADIO") > 0) return true;
        return false;
     },
     canDoNextTrack(c) {
@@ -862,12 +865,16 @@ export default {
               client_id: 'af75ff63f6f032b2637c95417a691c9bbab5a884a4f245bab3f6304bebe43147'
               }
           }).then(res => {
-              console.log(res.data.urls.custom);
+              console.log(res.data);
+              this.randomImage = {};
+              this.randomImage.userLink = res.data.user.links.html;
+              this.randomImage.userName = res.data.user.name;
               if (screen.width < 800)
-                  this.randomImage = res.data.urls.small;
+                  this.randomImage.image = res.data.urls.small;
               else
-                  this.randomImage = res.data.urls.regular;
+                  this.randomImage.image = res.data.urls.regular;
               /*
+              <a href="https://unsplash.com/@xangriffin">Xan Griffin</a>
               if(this.allPhotos == null) {
               this.allPhotos = res.data
               } else {
