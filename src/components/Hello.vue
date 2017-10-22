@@ -130,7 +130,7 @@
     </div> 
      <img class="img_splash" :src='randomImage.image'/> 
      <br /> 
-     <a :href='randomImage.userLink' target="_blank">Photographer:  {{randomImage.userName}}</a>
+     <a :href='randomImage.userLink' target="_blank">Photo from Unsplash by {{randomImage.userName}}</a>
      <br /> 
   </div>  
   </div>
@@ -868,6 +868,8 @@ export default {
               console.log(res.data);
               this.randomImage = {};
               this.randomImage.userLink = res.data.user.links.html;
+              this.randomImage.userLink = this.randomImage.userLink+
+                 "?utm_source=@jimclark&utm_medium=referral&utm_campaign=api-credit";
               this.randomImage.userName = res.data.user.name;
               if (screen.width < 800)
                   this.randomImage.image = res.data.urls.small;
