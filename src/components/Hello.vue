@@ -74,61 +74,60 @@
          </div>                  
         <br />
         <br />
-        <br />
-        
-        <div class="displaytable"  align="left">          
-            <div class="current_selection filterdiv" align="left" v-on:click="onFilterClick" > 
-                {{filterCaption}}
-           </div> 
-           <div v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
-             <h4  class = "blockButtons" v-on:click="play(c)"> {{c.name}}</h4><br />
-             <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
-             <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>         
-            <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
-            <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i>             
-            <div v-if="now_playing_track!=''">              
-              <mark v-if="now_playing_track.indexOf('Changing to') >=0">{{now_playing_track}}</mark>
-              <div v-else>{{now_playing_track}}</div>
-             </div>                        
-           </div>                      
-        </div>        
-        
-
-        <br />
-        <ul v-if="filterMode!=3" class="nav nav-pills">  
-           <li v-if="notCurrentlyPlayAndNotFiltered(c)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
-            <h4  v-on:click="play(c)"> {{c.name}}</h4>
-           </li>
-        </ul>         
-        <ul v-if="filterMode==3 " class="nav nav-pills"> 
-           <li  role="presentation"class="liItem2"  v-for="p in presetItems"  >
-            <h4  v-on:click="play(p)"> {{p.name}}</h4>
-           </li>
-        </ul>     
-        <br />   
-         <input v-if="contentItmes.length>10" v-model="searchString"  type="text" class="form-control inputSearch" placeholder="Search" ><br />
-        <div v-if="selected_play.item!=''">          
-          <hr style="height:1px;border:none;color:#333;background-color:#333;" />         
-            <div  class="input-group editname">                          
-              <span class="input-group-btn">
-                <button class="btn btn-primary" type="button" v-on:click="saveEditName(selected_play, edtName)" >
-                  Save
-                </button>
-                 <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger">Remove </button>
-              </span>              
-              <input type="text" class="form-control" placeholder="" v-model="edtName">
-            </div><!-- /input-group -->
-            <br />          
-           
-            </div>   
-             <div class="editPresets h4" v-if="filterMode==3" align="left"> 
-               Edit and Remove functions not available for your current view of <mark><strong>Device Presets</strong></mark>.  <br />
-               These items are set on the BOSE Device itself<br />
-               Ability to add/remove presets on device from this app are planned for future updates
-            </div>             
-        </div>    
+        <br />        
+        <div v-if="show_lib_div">
+            <div class="displaytable"  align="left">          
+                <div class="current_selection filterdiv" align="left" v-on:click="onFilterClick" > 
+                    {{filterCaption}}
+              </div> 
+              <div v-if="currentlyPlaying(c)" role="presentation"class="liItem2 current_selection"  v-for="c in contentItmes"  >
+                <h4  class = "blockButtons" v-on:click="play(c)"> {{c.name}}</h4><br />
+                <i v-if="currentlyPausible" v-on:click="post_key('PAUSE')" class="fa fa-pause fa-2x faButt" aria-hidden="true"></i>
+                <i v-if="currentlyPausible" v-on:click="post_key('PLAY')" class="fa fa-play fa-2x faButt" aria-hidden="true"></i>         
+                <i v-if="canDoNextTrack(c)" v-on:click="post_key('PREV_TRACK')" class="fa fa-backward fa-2x faButt" aria-hidden="true"></i>
+                <i v-if="canDoNextTrack(c)" v-on:click="post_key('NEXT_TRACK')" class="fa fa-forward fa-2x faButt"  aria-hidden="true"></i>             
+                <div v-if="now_playing_track!=''">              
+                  <mark v-if="now_playing_track.indexOf('Changing to') >=0">{{now_playing_track}}</mark>
+                  <div v-else>{{now_playing_track}}</div>
+                </div>                        
+              </div>                      
+            </div>        
+            <br />
+            <ul v-if="filterMode!=3" class="nav nav-pills">  
+              <li v-if="notCurrentlyPlayAndNotFiltered(c)" role="presentation"class="liItem2"  v-for="c in contentItmes"  >
+                <h4  v-on:click="play(c)"> {{c.name}}</h4>
+              </li>
+            </ul>         
+            <ul v-if="filterMode==3 " class="nav nav-pills"> 
+              <li  role="presentation"class="liItem2"  v-for="p in presetItems"  >
+                <h4  v-on:click="play(p)"> {{p.name}}</h4>
+              </li>
+            </ul>     
+            <br />   
+            <input v-if="contentItmes.length>10" v-model="searchString"  type="text" class="form-control inputSearch" placeholder="Search" ><br />
+            <div v-if="selected_play.item!=''">          
+              <hr style="height:1px;border:none;color:#333;background-color:#333;" />         
+                <div  class="input-group editname">                          
+                  <span class="input-group-btn">
+                    <button class="btn btn-primary" type="button" v-on:click="saveEditName(selected_play, edtName)" >
+                      Save
+                    </button>
+                    <button v-on:click="remove_content(selected_play)" type="button" class="btn btn-danger">Remove </button>
+                  </span>              
+                  <input type="text" class="form-control" placeholder="" v-model="edtName">
+                </div><!-- /input-group -->
+                <br />          
+              
+                </div>   
+                <div class="editPresets h4" v-if="filterMode==3" align="left"> 
+                  Edit and Remove functions not available for your current view of <mark><strong>Device Presets</strong></mark>.  <br />
+                  These items are set on the BOSE Device itself<br />
+                  Ability to add/remove presets on device from this app are planned for future updates
+                </div>             
+            </div>    
+        </div>
     </div> 
-     <img class="img_splash" :src='randomImage.image'/> 
+     <img v-on:click="show_lib_div_click" class="img_splash" :src='randomImage.image'/> 
      <br /> 
      <a :href='randomImage.userLink' target="_blank">Photo from Unsplash by {{randomImage.userName}}</a>
      <br /> 
@@ -155,6 +154,7 @@ export default {
   },
   data () {
     return {
+      show_lib_div: true,
       my_ip_address: {},
       randomImage: {},
       searchString: "",
@@ -222,6 +222,9 @@ export default {
   computed: {
   },
   methods: {
+    show_lib_div_click() {
+      this.show_lib_div = !this.show_lib_div;
+    },
     get_device_serialnumber() {
         if (!this.deviceInfo.hasOwnProperty('info'))
             return ""; //serialNumber
