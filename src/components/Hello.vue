@@ -3,7 +3,7 @@
 <template>
   <div class="wrapper">
   <div class="container">
-    {{randomImageUser}}  
+    <!-- <img v-on:click="show_lib_div_click" class="img_splash" :src='api_response.thunbnail'/>  -->
     <div class="row"> 
       <div>        
         
@@ -154,6 +154,7 @@ export default {
   },
   data () {
     return {
+      api_response: {},
       show_lib_div: true,
       my_ip_address: {},
       randomImage: {},
@@ -218,6 +219,7 @@ export default {
       this.get_presets();
       this.get_now_playing(false);
       this.fetchRandomImage();
+      // this.load_images_from_api();
   },
   computed: {
   },
@@ -755,6 +757,19 @@ export default {
 	      };
         this.play(random_content);
 
+      },
+      load_images_from_api() {
+          //http://localhost:51935/api/Images/5
+          console.log('load_images_from_api');
+          // axios.get('http://localhost:51935/api/Images/5', {              
+          axios.get('http://api.jimclark.net.au/api/Images/5', {   
+          }).then(res => {
+             console.log(res.data);
+              this.api_response = {};
+              this.api_response = res.data;
+              var _thumb = this.api_response.thunbnail
+              this.api_response.thunbnail = 'data:image/jpeg;base64,'+_thumb;
+          })
       },
       load_from_backend() {
                 console.log("load_from_backend");                
