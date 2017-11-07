@@ -3,6 +3,8 @@
 <template>
   <div class="wrapper">
   <div class="container">
+    <!--  {{api_response}} -->
+   
     <!-- <img v-on:click="show_lib_div_click" class="img_splash" :src='api_response.thunbnail'/>  -->
     <div class="row"> 
       <div>        
@@ -131,6 +133,12 @@
      <br /> 
      <a :href='randomImage.userLink' target="_blank">Photo from Unsplash by {{randomImage.userName}}</a>
      <br /> 
+     <br /> 
+     <h4 class='liText'>Photos from Melbourne Zoo </h4>
+     <h5 class='liText'>Click image to open </h5>
+      <div>
+      <img v-for="i in api_response.items" v-on:click="open_url_from_api_item(i)" class="img_splash" :src='get_img_source_from_api_item(i)'/> 
+    </div> 
   </div>  
   </div>
 
@@ -219,7 +227,7 @@ export default {
       this.get_presets();
       this.get_now_playing(false);
       this.fetchRandomImage();
-      // this.load_images_from_api();
+      this.load_images_from_api();
   },
   computed: {
   },
@@ -758,6 +766,12 @@ export default {
         this.play(random_content);
 
       },
+      open_url_from_api_item(i) {
+        window.open(i.url,'_blank');
+      },
+      get_img_source_from_api_item(i) {
+       return 'data:image/jpeg;base64,'+i.thunbnail;
+      },
       load_images_from_api() {
           //http://localhost:51935/api/Images/5
           console.log('load_images_from_api');
@@ -767,8 +781,8 @@ export default {
              console.log(res.data);
               this.api_response = {};
               this.api_response = res.data;
-              var _thumb = this.api_response.thunbnail
-              this.api_response.thunbnail = 'data:image/jpeg;base64,'+_thumb;
+              //var _thumb = this.api_response.thunbnail
+              //this.api_response.thunbnail = 'data:image/jpeg;base64,'+_thumb;
           })
       },
       load_from_backend() {
@@ -914,6 +928,10 @@ export default {
 <style scoped>
   ul {
   }
+  img {
+    padding-right: 20px;
+    padding-top: 20px;
+  }
   img_splash{
     width: 100%;
   }
@@ -999,7 +1017,7 @@ export default {
     color: white;
   }
   .liText {
-    background-color: navy;
+    
     color: white;
   }
   .liItem {
